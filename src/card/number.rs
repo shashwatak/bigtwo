@@ -38,7 +38,6 @@ impl fmt::Display for Number {
     }
 }
 
-
 #[derive(Debug)]
 pub enum ParseNumberError {
     Empty,
@@ -69,7 +68,6 @@ impl FromStr for Number {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

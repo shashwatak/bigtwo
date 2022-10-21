@@ -10,7 +10,7 @@ pub enum Suit {
 }
 
 impl fmt::Display for Suit {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { 
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Suit::Clubs => write!(f, "C"),
             Suit::Diamonds => write!(f, "D"),
@@ -19,7 +19,6 @@ impl fmt::Display for Suit {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub enum ParseSuitError {

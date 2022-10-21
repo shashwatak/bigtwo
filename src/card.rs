@@ -15,7 +15,6 @@ pub struct Card {
     suit: Suit,
 }
 
-
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}", self.number, self.suit)
@@ -40,11 +39,11 @@ impl FromStr for Card {
                 let maybe_number = number_char.to_string().parse::<Number>();
                 let maybe_suit = suit_char.to_string().parse::<Suit>();
                 match (maybe_number, maybe_suit) {
-                    (Ok(number), Ok(suit)) => Ok(Card {number, suit}),
+                    (Ok(number), Ok(suit)) => Ok(Card { number, suit }),
                     (Err(e), _) => Err(Self::Err::BadNumber(e)),
                     (_, Err(e)) => Err(Self::Err::BadSuit(e)),
                 }
-            },
+            }
             _ => unreachable!(),
         }
     }
