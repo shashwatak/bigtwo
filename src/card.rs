@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 use self::{number::ParseNumberError, suit::ParseSuitError};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
     number: Number,
     suit: Suit,
@@ -83,5 +83,12 @@ mod tests {
             let result_cell = cell.unwrap().to_string();
             assert_eq!(expected_cell, result_cell);
         }
+    }
+
+    #[test]
+    fn test_card_order() {
+        assert!("2S".parse::<Card>().unwrap() > "2D".parse::<Card>().unwrap());
+        assert!("2S".parse::<Card>().unwrap() > "AS".parse::<Card>().unwrap());
+        assert!("TD".parse::<Card>().unwrap() == "TD".parse::<Card>().unwrap());
     }
 }

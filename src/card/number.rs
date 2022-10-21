@@ -1,7 +1,7 @@
 use core::fmt;
 use std::str::FromStr;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Number {
     Three,
     Four,
