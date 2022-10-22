@@ -29,6 +29,18 @@ pub enum ParseCardError {
     BadSuit(ParseSuitError),
 }
 
+impl From<ParseNumberError> for ParseCardError {
+    fn from(error: ParseNumberError) -> Self {
+        ParseCardError::BadNumber(error)
+    }
+}
+
+impl From<ParseSuitError> for ParseCardError {
+    fn from(error: ParseSuitError) -> Self {
+        ParseCardError::BadSuit(error)
+    }
+}
+
 impl FromStr for Card {
     type Err = ParseCardError;
     fn from_str(cell_str: &str) -> Result<Self, Self::Err> {
@@ -36,13 +48,9 @@ impl FromStr for Card {
             [] => Err(Self::Err::Empty),
             chars if chars.len() != 2 => Err(Self::Err::BadLen),
             [number_char, suit_char] => {
-                let maybe_number = number_char.to_string().parse::<Number>();
-                let maybe_suit = suit_char.to_string().parse::<Suit>();
-                match (maybe_number, maybe_suit) {
-                    (Ok(number), Ok(suit)) => Ok(Card { number, suit }),
-                    (Err(e), _) => Err(Self::Err::BadNumber(e)),
-                    (_, Err(e)) => Err(Self::Err::BadSuit(e)),
-                }
+                let number = number_char.to_string().parse::<Number>()?;
+                let suit = suit_char.to_string().parse::<Suit>()?;
+                Ok(Card { number, suit })
             }
             _ => unreachable!(),
         }
