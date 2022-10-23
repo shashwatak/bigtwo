@@ -76,7 +76,7 @@ fn try_trips(cards: [Card; 3]) -> Result<Hand, InvalidHandError> {
 impl FromStr for Hand {
     type Err = ParseHandError;
     fn from_str(hand_str: &str) -> Result<Self, Self::Err> {
-        match hand_str.split(" ").collect::<Vec<&str>>()[..] {
+        match hand_str.split(' ').collect::<Vec<&str>>()[..] {
             [""] => Err(Self::Err::Empty),
             [a] => Ok(Hand::Lone([a.parse()?])),
             [a, b] => Ok(try_pair([a.parse()?, b.parse()?])?),
