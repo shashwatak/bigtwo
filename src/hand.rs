@@ -1,5 +1,5 @@
 use core::fmt;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::str::FromStr;
 
 use crate::card::Card;
@@ -66,7 +66,7 @@ fn try_cards(maybe_cards: &[&str]) -> Result<Vec<Card>, ParseHandError> {
         cards.push(maybe_card.parse()?);
     }
 
-    let unique_cards: HashSet<Card> = HashSet::from_iter(cards.iter().cloned());
+    let unique_cards: BTreeSet<Card> = BTreeSet::from_iter(cards.iter().cloned());
     if unique_cards.len() < cards.len() {
         return Err(ParseHandError::DuplicateCard);
     }
