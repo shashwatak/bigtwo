@@ -60,8 +60,8 @@ impl From<InvalidHandError> for ParseHandError {
     }
 }
 
-fn try_cards(maybe_cards: &[&str]) -> Result<Vec<Card>, ParseHandError> { 
-    let mut cards : Vec<Card> = vec![];
+fn try_cards(maybe_cards: &[&str]) -> Result<Vec<Card>, ParseHandError> {
+    let mut cards: Vec<Card> = vec![];
     for maybe_card in maybe_cards {
         cards.push(maybe_card.parse()?);
     }
@@ -71,14 +71,16 @@ fn try_cards(maybe_cards: &[&str]) -> Result<Vec<Card>, ParseHandError> {
         return Err(ParseHandError::DuplicateCard);
     }
     for (i, card) in cards.iter().enumerate() {
-        if i == 0 { continue; }
-        if cards[i-1] < *card {
+        if i == 0 {
+            continue;
+        }
+        if cards[i - 1] < *card {
             return Err(ParseHandError::NotSortedDescending);
         }
     }
     Ok(cards)
 }
-    // let cards : [Card; 2] = [maybe_cards[0].parse()?, maybe_cards[1].parse()?];
+
 fn try_pair(cards: [Card; 2]) -> Result<Hand, InvalidHandError> {
     if cards[0].number == cards[1].number {
         Ok(Hand::Pair(cards))
