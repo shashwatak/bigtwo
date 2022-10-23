@@ -11,8 +11,8 @@ use self::{number::ParseNumberError, suit::ParseSuitError};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
-    number: Number,
-    suit: Suit,
+    pub number: Number,
+    pub suit: Suit,
 }
 
 impl fmt::Display for Card {
