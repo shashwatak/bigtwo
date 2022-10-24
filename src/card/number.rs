@@ -18,6 +18,26 @@ pub enum Number {
     Two,
 }
 
+const NUMBERS: [Number; 13] = [
+    Number::Three,
+    Number::Four,
+    Number::Five,
+    Number::Six,
+    Number::Seven,
+    Number::Eight,
+    Number::Nine,
+    Number::Ten,
+    Number::Jack,
+    Number::Queen,
+    Number::King,
+    Number::Ace,
+    Number::Two,
+];
+
+impl Number {
+    pub fn all() -> [Number; 13] { NUMBERS }
+}
+
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

@@ -1,5 +1,5 @@
-mod number;
-mod suit;
+pub mod number;
+pub mod suit;
 
 use number::Number;
 use suit::Suit;
