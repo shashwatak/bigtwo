@@ -3,10 +3,11 @@ use std::collections::BTreeSet;
 use crate::hand::Hand;
 use crate::player::Player;
 
-pub struct Trick {
+pub struct Trick<'a> {
     pub hand: Hand,
-    pub player: Player,
-    pub passed_players: BTreeSet<Player>,
+    pub current_player_id: usize,
+    pub passed_player_ids: BTreeSet<usize>,
+    players: &'a [Player; 4],
 }
 
 pub enum InvalidPlayedHand {
@@ -14,14 +15,15 @@ pub enum InvalidPlayedHand {
     NotHighEnough,
 }
 
-impl Trick {
-    pub fn try_play_hand(&mut self, hand: Hand) -> Result<(), InvalidPlayedHand> { 
-        Trick::check_hand_playable(&self.hand, &hand)?;
-        self.hand = hand;
-        if let Some(p) = self.next_player() {
-            self.player = p;
+impl<'a> Trick<'a> {
+    pub fn try_play_hand(&mut self, hand: Hand) -> Result<(), InvalidPlayedHand> {
+        assert!(!self.passed_player_ids.contains(&self.current_player_id));
+        if let Hand::Pass = hand {
+            self.passed_player_ids.insert(self.current_player_id);
         } else {
-            unreachable!();
+            // assert!(Trick::check_player_has_cards(&self.players[self.current_player_id], hand));
+            Trick::check_hand_playable(&self.hand, &hand)?;
+            self.hand = hand;
         }
         Ok(())
     }
@@ -47,7 +49,13 @@ impl Trick {
         }
     }
 
-    fn next_player(&self) -> Option<Player> {
+    fn next_player(&self) -> Option<usize> {
+        for i in 1..4 {
+            let next_id = (self.current_player_id + i) % 4;
+            if !self.passed_player_ids.contains(&next_id) {
+                return Some(next_id);
+            }
+        }
         None
     }
 }
@@ -79,6 +87,5 @@ mod tests {
             Trick::check_hand_playable(&previous, &attempted),
             Err(InvalidPlayedHand::WrongType)
         ));
-
     }
 }
