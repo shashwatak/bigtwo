@@ -10,6 +10,7 @@ pub enum Hand {
     Lone([Card; 1]),
     Pair([Card; 2]),
     Trips([Card; 3]),
+    Pass,
 }
 
 fn join_cards(cards: &[Card]) -> String {
@@ -28,13 +29,13 @@ impl fmt::Display for Hand {
             Hand::Lone(cards) => write!(f, "{}", join_cards(cards)),
             Hand::Pair(cards) => write!(f, "{}", join_cards(cards)),
             Hand::Trips(cards) => write!(f, "{}", join_cards(cards)),
+            Hand::Pass => write!(f, "")
         }
     }
 }
 
 #[derive(Debug)]
 pub enum ParseHandError {
-    Empty,
     BadLen,
     BadCard(ParseCardError),
     DuplicateCard,
@@ -102,7 +103,7 @@ impl FromStr for Hand {
     fn from_str(hand_str: &str) -> Result<Self, Self::Err> {
         let hand_str = hand_str.trim();
         if let "" = hand_str {
-            return Err(Self::Err::Empty);
+            return Ok(Hand::Pass);
         }
         let splits = hand_str.split(' ').collect::<Vec<&str>>();
         let cards = try_cards(&splits[..])?;
@@ -122,10 +123,6 @@ mod tests {
 
     #[test]
     fn test_bad_hand_to_from_string() {
-        {
-            let hand = "".to_string().parse::<Hand>();
-            assert!(matches!(hand, Err(ParseHandError::Empty)));
-        }
         {
             let hand = "AJ".to_string().parse::<Hand>();
             assert!(matches!(hand, Err(ParseHandError::BadCard(_))));
@@ -162,7 +159,7 @@ mod tests {
 
     #[test]
     fn test_good_hand_to_from_string() {
-        let good_hands = ["2S", "3D 3C", "KS KH KC"];
+        let good_hands = ["", "2S", "3D 3C", "KS KH KC"];
         for expected_hand in good_hands {
             let hand = expected_hand.to_string().parse::<Hand>();
             println!("{:?}", hand);
@@ -177,5 +174,6 @@ mod tests {
         assert!("2S".parse::<Hand>().unwrap() > "2D".parse::<Hand>().unwrap());
         assert!("2S 2D".parse::<Hand>().unwrap() > "AS AD".parse::<Hand>().unwrap());
         assert!("TS TD TC".parse::<Hand>().unwrap() < "TS TH TC".parse::<Hand>().unwrap());
+        assert!("".parse::<Hand>().unwrap() > "2S 2H 2D".parse::<Hand>().unwrap());
     }
 }
