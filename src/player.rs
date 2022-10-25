@@ -1,7 +1,8 @@
-pub enum Player {
-    P1,
-    P2,
-    P3,
-    P4,
+use crate::card::Card;
+
+
+#[derive(Debug, Default)]
+pub struct Player {
+    pub cards: Vec<Card>,
 }
 
