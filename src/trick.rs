@@ -49,10 +49,11 @@ impl<'a> Trick<'a> {
         }
     }
 
-    fn next_player(&self) -> Option<usize> {
+    fn next_player_id(current_player_id: usize, passed_player_ids: &BTreeSet<usize>) -> Option<usize> {
+        assert!(current_player_id < 4);
         for i in 1..4 {
-            let next_id = (self.current_player_id + i) % 4;
-            if !self.passed_player_ids.contains(&next_id) {
+            let next_id = (current_player_id + i) % 4;
+            if !passed_player_ids.contains(&next_id) {
                 return Some(next_id);
             }
         }
@@ -87,5 +88,33 @@ mod tests {
             Trick::check_hand_playable(&previous, &attempted),
             Err(InvalidPlayedHand::WrongType)
         ));
+    }
+
+    #[test]
+    fn test_next_player_id() {
+        let current_player_id: usize = 0;
+        let passed_player_ids : BTreeSet<usize> = BTreeSet::new();
+        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
+        assert_eq!(next_player_id, 1);
+
+        let current_player_id: usize = 3;
+        let passed_player_ids : BTreeSet<usize> = BTreeSet::new();
+        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
+        assert_eq!(next_player_id, 0);
+
+        let current_player_id: usize = 0;
+        let passed_player_ids : BTreeSet<usize> = BTreeSet::from([1,2]);
+        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
+        assert_eq!(next_player_id, 3);
+
+        let current_player_id: usize = 2;
+        let passed_player_ids : BTreeSet<usize> = BTreeSet::from([0,3]);
+        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
+        assert_eq!(next_player_id, 1);
+
+        let current_player_id: usize = 3;
+        let passed_player_ids : BTreeSet<usize> = BTreeSet::from([0, 1,2]);
+        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids);
+        assert_eq!(next_player_id, None);
     }
 }
