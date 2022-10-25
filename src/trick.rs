@@ -26,8 +26,25 @@ impl Trick {
         Ok(())
     }
 
+    fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
+        match (previous, attempted) {
+            (Hand::Lone(_), Hand::Lone(_)) => true,
+            (Hand::Pair(_), Hand::Pair(_)) => true,
+            (Hand::Trips(_), Hand::Trips(_)) => true,
+            _ => false,
+        }
+    }
+
     fn check_hand_playable(previous: &Hand, attempted: &Hand) -> Result<(), InvalidPlayedHand> {
-        Err(InvalidPlayedHand::WrongType)
+        if Trick::is_same_type(previous, attempted) {
+            if attempted > previous {
+                Ok(())
+            } else {
+                Err(InvalidPlayedHand::NotHighEnough)
+            }
+        } else {
+            Err(InvalidPlayedHand::WrongType)
+        }
     }
 
     fn next_player(&self) -> Option<Player> {
@@ -41,5 +58,27 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_bad_hand_update() {}
+    fn test_check_hand_is_not_playable() {
+        let previous: Hand = "3S 3C".to_string().parse().unwrap();
+        let attempted: Hand = "3H 3D".to_string().parse().unwrap();
+        assert!(matches!(
+            Trick::check_hand_playable(&previous, &attempted),
+            Err(InvalidPlayedHand::NotHighEnough)
+        ));
+
+        let previous: Hand = "3S 3C".to_string().parse().unwrap();
+        let attempted: Hand = "4S 4H 4D".to_string().parse().unwrap();
+        assert!(matches!(
+            Trick::check_hand_playable(&previous, &attempted),
+            Err(InvalidPlayedHand::WrongType)
+        ));
+
+        let previous: Hand = "3S 3C".to_string().parse().unwrap();
+        let attempted: Hand = "2S".to_string().parse().unwrap();
+        assert!(matches!(
+            Trick::check_hand_playable(&previous, &attempted),
+            Err(InvalidPlayedHand::WrongType)
+        ));
+
+    }
 }
