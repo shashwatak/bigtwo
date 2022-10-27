@@ -5,19 +5,27 @@ use crate::card::Card;
 const NUM_CARDS_IN_DECK: usize = 52;
 
 struct Deck {
-    pub cards: [Card; NUM_CARDS_IN_DECK],
+    // Originally wanted to use a fixed-size array, to keep things on the stack,
+    // but this proved difficult because it is not possible to move Cards out of
+    // the array, and we want to avoid Copy
+    // pub cards: [Card; NUM_CARDS_IN_DECK],
+    pub cards: Vec<Card>,
 }
 
 impl Deck {
     pub fn new() -> Deck {
-        let mut cards: [Card; NUM_CARDS_IN_DECK] = ["3C".parse().unwrap(); NUM_CARDS_IN_DECK];
-        let numbers = Number::all();
-        let suits = Suit::all();
+        let mut cards: Vec<Card> = Vec::new();
+        let numbers = &Number::all();
+        let suits = &Suit::all();
         for i in 0..NUM_CARDS_IN_DECK {
-            cards[i].number = numbers[i / 4];
-            cards[i].suit = suits[i % 4];
+            cards.push(Card {
+                number: numbers[i / 4],
+                suit: suits[i % 4],
+            });
         }
-        Deck { cards }
+        Deck {
+            cards,
+        }
     }
 }
 

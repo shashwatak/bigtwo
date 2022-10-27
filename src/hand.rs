@@ -5,31 +5,21 @@ use std::str::FromStr;
 use crate::card::Card;
 use crate::card::ParseCardError;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Hand {
-    Lone([Card; 1]),
-    Pair([Card; 2]),
-    Trips([Card; 3]),
+    Lone(Card),
+    Pair(Card, Card),
+    Trips(Card, Card, Card),
     Pass,
-}
-
-fn join_cards(cards: &[Card]) -> String {
-    cards
-        .iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<String>>()
-        .join(" ")
-        .trim()
-        .to_string()
 }
 
 impl fmt::Display for Hand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Hand::Lone(cards) => write!(f, "{}", join_cards(cards)),
-            Hand::Pair(cards) => write!(f, "{}", join_cards(cards)),
-            Hand::Trips(cards) => write!(f, "{}", join_cards(cards)),
-            Hand::Pass => write!(f, "")
+            Hand::Lone(a) => write!(f, "{}", a),
+            Hand::Pair(a, b) => write!(f, "{} {}", a, b),
+            Hand::Trips(a, b, c) => write!(f, "{} {} {}", a, b, c),
+            Hand::Pass => write!(f, ""),
         }
     }
 }
@@ -61,13 +51,38 @@ impl From<InvalidHandError> for ParseHandError {
     }
 }
 
-fn try_cards(maybe_cards: &[&str]) -> Result<Vec<Card>, ParseHandError> {
-    let mut cards: Vec<Card> = vec![];
-    for maybe_card in maybe_cards {
-        cards.push(maybe_card.parse()?);
+impl Hand {
+    pub fn try_from_cards(cards: &[Card]) -> Result<Hand, ParseHandError> {
+        sanitize_cards(cards)?;
+        match cards {
+            [] => Ok(Hand::Pass),
+            [a] => Ok(Hand::Lone(*a)),
+            [a, b] => Ok(Hand::try_pair(*a, *b)?),
+            [a, b, c] => Ok(Hand::try_trips(*a, *b, *c)?),
+            _ => Err(ParseHandError::BadLen),
+        }
     }
 
-    let unique_cards: BTreeSet<Card> = BTreeSet::from_iter(cards.iter().cloned());
+    fn try_pair(first: Card, second: Card) -> Result<Hand, InvalidHandError> {
+        if first.number == second.number {
+            Ok(Hand::Pair(first, second))
+        } else {
+            Err(InvalidHandError::UnmatchedPair)
+        }
+    }
+
+    fn try_trips(first: Card, second: Card, third: Card) -> Result<Hand, InvalidHandError> {
+        if first.number == second.number && second.number == third.number {
+            Ok(Hand::Trips(first, second, third))
+        } else {
+            Err(InvalidHandError::UnmatchedTrips)
+        }
+    }
+fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
+    let unique_cards: BTreeSet<&Card> = BTreeSet::new();
+    for card in cards {
+        unique_cards.insert(&card);
+    }
     if unique_cards.len() < cards.len() {
         return Err(ParseHandError::DuplicateCard);
     }
@@ -79,40 +94,22 @@ fn try_cards(maybe_cards: &[&str]) -> Result<Vec<Card>, ParseHandError> {
             return Err(ParseHandError::NotSortedDescending);
         }
     }
-    Ok(cards)
+    Ok(())
 }
 
-fn try_pair(cards: [Card; 2]) -> Result<Hand, InvalidHandError> {
-    if cards[0].number == cards[1].number {
-        Ok(Hand::Pair(cards))
-    } else {
-        Err(InvalidHandError::UnmatchedPair)
-    }
-}
-
-fn try_trips(cards: [Card; 3]) -> Result<Hand, InvalidHandError> {
-    if cards[0].number == cards[1].number && cards[0].number == cards[2].number {
-        Ok(Hand::Trips(cards))
-    } else {
-        Err(InvalidHandError::UnmatchedTrips)
-    }
 }
 
 impl FromStr for Hand {
     type Err = ParseHandError;
-    fn from_str(hand_str: &str) -> Result<Self, Self::Err> {
+    fn from_str(hand_str: &str) -> Result<Hand, Self::Err> {
         let hand_str = hand_str.trim();
-        if let "" = hand_str {
-            return Ok(Hand::Pass);
+        let maybe_cards = hand_str.split(' ').collect::<Vec<&str>>();
+        let mut cards: Vec<Card> = vec![];
+        for maybe_card in maybe_cards {
+            cards.push(maybe_card.parse()?);
         }
-        let splits = hand_str.split(' ').collect::<Vec<&str>>();
-        let cards = try_cards(&splits[..])?;
-        match cards[..] {
-            [a] => Ok(Hand::Lone([a])),
-            [a, b] => Ok(try_pair([a, b])?),
-            [a, b, c] => Ok(try_trips([a, b, c])?),
-            _ => Err(Self::Err::BadLen),
-        }
+        Hand::sanitize_cards(&cards[..])?;
+        Hand::try_from_cards(&cards)
     }
 }
 
