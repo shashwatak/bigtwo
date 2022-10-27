@@ -23,9 +23,7 @@ impl Deck {
                 suit: suits[i % 4],
             });
         }
-        Deck {
-            cards,
-        }
+        Deck { cards }
     }
 }
 
@@ -40,7 +38,10 @@ mod tests {
     fn test_new_deck() {
         let deck = Deck::new();
         assert_eq!(deck.cards.len(), NUM_CARDS_IN_DECK);
-        let unique_cards: BTreeSet<Card> = BTreeSet::from(deck.cards);
+        let mut unique_cards: BTreeSet<Card> = BTreeSet::new();
+        for card in deck.cards {
+            unique_cards.insert(card);
+        }
         assert_eq!(unique_cards.len(), NUM_CARDS_IN_DECK);
     }
 }
