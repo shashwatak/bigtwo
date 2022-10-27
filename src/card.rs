@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 use self::{number::ParseNumberError, suit::ParseSuitError};
 
-#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
     pub number: Number,
     pub suit: Suit,
