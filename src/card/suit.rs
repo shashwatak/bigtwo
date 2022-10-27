@@ -9,15 +9,12 @@ pub enum Suit {
     Spades,
 }
 
-const SUITS: [Suit; 4] = [
-    Suit::Clubs,
-    Suit::Diamonds,
-    Suit::Hearts,
-    Suit::Spades,
-];
+const SUITS: [Suit; 4] = [Suit::Clubs, Suit::Diamonds, Suit::Hearts, Suit::Spades];
 
 impl Suit {
-    pub fn all() -> [Suit; 4] { SUITS }
+    pub fn all() -> [Suit; 4] {
+        SUITS
+    }
 }
 
 impl fmt::Display for Suit {

@@ -35,7 +35,9 @@ const NUMBERS: [Number; 13] = [
 ];
 
 impl Number {
-    pub fn all() -> [Number; 13] { NUMBERS }
+    pub fn all() -> [Number; 13] {
+        NUMBERS
+    }
 }
 
 impl fmt::Display for Number {
