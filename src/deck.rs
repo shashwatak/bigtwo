@@ -40,7 +40,7 @@ mod tests {
     fn test_new_deck() {
         let deck = Deck::new();
         assert_eq!(deck.cards.len(), NUM_CARDS_IN_DECK);
-        let unique_cards : BTreeSet<Card> = BTreeSet::from(deck.cards);
+        let unique_cards: BTreeSet<Card> = BTreeSet::from(deck.cards);
         assert_eq!(unique_cards.len(), NUM_CARDS_IN_DECK);
     }
 }
