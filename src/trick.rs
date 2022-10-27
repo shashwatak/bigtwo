@@ -95,29 +95,29 @@ mod tests {
 
     #[test]
     fn test_next_player_id() {
-        let current_player_id: usize = 0;
-        let passed_player_ids: BTreeSet<usize> = BTreeSet::new();
-        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
-        assert_eq!(next_player_id, 1);
+        let current: usize = 0;
+        let has_passed: BTreeSet<usize> = BTreeSet::new();
+        let next = Trick::next_player_id(current, &has_passed);
+        assert_eq!(next.unwrap(), 1);
 
-        let current_player_id: usize = 3;
-        let passed_player_ids: BTreeSet<usize> = BTreeSet::new();
-        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
-        assert_eq!(next_player_id, 0);
+        let current: usize = 3;
+        let has_passed: BTreeSet<usize> = BTreeSet::new();
+        let next = Trick::next_player_id(current, &has_passed);
+        assert_eq!(next.unwrap(), 0);
 
-        let current_player_id: usize = 0;
-        let passed_player_ids: BTreeSet<usize> = BTreeSet::from([1, 2]);
-        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
-        assert_eq!(next_player_id, 3);
+        let current: usize = 0;
+        let has_passed: BTreeSet<usize> = BTreeSet::from([1, 2]);
+        let next = Trick::next_player_id(current, &has_passed);
+        assert_eq!(next.unwrap(), 3);
 
-        let current_player_id: usize = 2;
-        let passed_player_ids: BTreeSet<usize> = BTreeSet::from([0, 3]);
-        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids).unwrap();
-        assert_eq!(next_player_id, 1);
+        let current: usize = 2;
+        let has_passed: BTreeSet<usize> = BTreeSet::from([0, 3]);
+        let next = Trick::next_player_id(current, &has_passed);
+        assert_eq!(next.unwrap(), 1);
 
-        let current_player_id: usize = 3;
-        let passed_player_ids: BTreeSet<usize> = BTreeSet::from([0, 1, 2]);
-        let next_player_id = Trick::next_player_id(current_player_id, &passed_player_ids);
-        assert_eq!(next_player_id, None);
+        let current: usize = 3;
+        let has_passed: BTreeSet<usize> = BTreeSet::from([0, 1, 2]);
+        let next = Trick::next_player_id(current, &has_passed);
+        assert_eq!(next, None);
     }
 }
