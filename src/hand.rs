@@ -53,7 +53,7 @@ impl From<InvalidHandError> for ParseHandError {
 
 impl Hand {
     pub fn try_from_cards(cards: &[Card]) -> Result<Hand, ParseHandError> {
-        sanitize_cards(cards)?;
+        Self::sanitize_cards(cards)?;
         match cards {
             [] => Ok(Hand::Pass),
             [a] => Ok(Hand::Lone(*a)),
@@ -78,37 +78,45 @@ impl Hand {
             Err(InvalidHandError::UnmatchedTrips)
         }
     }
-fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
-    let unique_cards: BTreeSet<&Card> = BTreeSet::new();
-    for card in cards {
-        unique_cards.insert(&card);
-    }
-    if unique_cards.len() < cards.len() {
-        return Err(ParseHandError::DuplicateCard);
-    }
-    for (i, card) in cards.iter().enumerate() {
-        if i == 0 {
-            continue;
-        }
-        if cards[i - 1] < *card {
-            return Err(ParseHandError::NotSortedDescending);
-        }
-    }
-    Ok(())
-}
 
+    fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
+        let mut unique_cards: BTreeSet<&Card> = BTreeSet::new();
+        for card in cards {
+            unique_cards.insert(&card);
+        }
+        if unique_cards.len() < cards.len() {
+            return Err(ParseHandError::DuplicateCard);
+        }
+
+        for (i, card) in cards.iter().enumerate() {
+            if i == 0 {
+                continue;
+            }
+            if cards[i - 1] < *card {
+                return Err(ParseHandError::NotSortedDescending);
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl FromStr for Hand {
     type Err = ParseHandError;
+
     fn from_str(hand_str: &str) -> Result<Hand, Self::Err> {
         let hand_str = hand_str.trim();
+        if hand_str.len() == 0 {
+            return Ok(Hand::Pass);
+        }
         let maybe_cards = hand_str.split(' ').collect::<Vec<&str>>();
         let mut cards: Vec<Card> = vec![];
         for maybe_card in maybe_cards {
             cards.push(maybe_card.parse()?);
         }
+
         Hand::sanitize_cards(&cards[..])?;
+
         Hand::try_from_cards(&cards)
     }
 }
@@ -120,38 +128,31 @@ mod tests {
 
     #[test]
     fn test_bad_hand_to_from_string() {
-        {
-            let hand = "AJ".to_string().parse::<Hand>();
-            assert!(matches!(hand, Err(ParseHandError::BadCard(_))));
-        }
-        {
-            let hand = "7D 5C 4C 3C".to_string().parse::<Hand>();
-            assert!(matches!(hand, Err(ParseHandError::BadLen)));
-        }
-        {
-            let hand = "3C 4D".to_string().parse::<Hand>();
-            assert!(matches!(hand, Err(ParseHandError::NotSortedDescending)));
-        }
-        {
-            let hand = "7D 3C 4C 5C 3C".to_string().parse::<Hand>();
-            assert!(matches!(hand, Err(ParseHandError::DuplicateCard)));
-        }
-        {
-            let hand = "2D 3S".to_string().parse::<Hand>();
-            assert!(matches!(
-                hand,
-                Err(ParseHandError::InvalidHand(InvalidHandError::UnmatchedPair))
-            ));
-        }
-        {
-            let hand = "2S 2H 3S".to_string().parse::<Hand>();
-            assert!(matches!(
-                hand,
-                Err(ParseHandError::InvalidHand(
-                    InvalidHandError::UnmatchedTrips
-                ))
-            ));
-        }
+        let hand = "AJ".to_string().parse::<Hand>();
+        assert!(matches!(hand, Err(ParseHandError::BadCard(_))));
+
+        let hand = "7D 5C 4C 3C".to_string().parse::<Hand>();
+        assert!(matches!(hand, Err(ParseHandError::BadLen)));
+
+        let hand = "3C 4D".to_string().parse::<Hand>();
+        assert!(matches!(hand, Err(ParseHandError::NotSortedDescending)));
+
+        let hand = "7D 3C 4C 5C 3C".to_string().parse::<Hand>();
+        assert!(matches!(hand, Err(ParseHandError::DuplicateCard)));
+
+        let hand = "2D 3S".to_string().parse::<Hand>();
+        assert!(matches!(
+            hand,
+            Err(ParseHandError::InvalidHand(InvalidHandError::UnmatchedPair))
+        ));
+
+        let hand = "2S 2H 3S".to_string().parse::<Hand>();
+        assert!(matches!(
+            hand,
+            Err(ParseHandError::InvalidHand(
+                InvalidHandError::UnmatchedTrips
+            ))
+        ));
     }
 
     #[test]
