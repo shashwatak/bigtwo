@@ -9,22 +9,36 @@ pub struct Trick {
     pub passed_player_ids: BTreeSet<usize>,
 }
 
+pub enum PlayHandStatus {
+    GameOver,
+    TrickOver,
+    Pass,
+    SuccessPlay,
+    FailedPlay(InvalidPlayedHand),
+}
+
 pub enum InvalidPlayedHand {
     WrongType,
     NotHighEnough,
 }
 
+impl From<InvalidPlayedHand> for PlayHandStatus {
+    fn from(e: InvalidPlayedHand) -> Self {
+       Self::FailedPlay(e) 
+    }
+}
+
 impl Trick {
-    pub fn try_play_hand(&mut self, hand: Hand) -> Result<(), InvalidPlayedHand> {
-        assert!(!self.passed_player_ids.contains(&self.current_player_id));
+
+    fn try_play_hand(&mut self, hand: Hand) -> PlayHandStatus {
+        // assert!(!self.passed_player_ids.contains(&self.current_player_id));
         if let Hand::Pass = hand {
-            self.passed_player_ids.insert(self.current_player_id);
-        } else {
-            // assert!(Trick::check_player_has_cards(&self.players[self.current_player_id], hand));
-            Trick::check_hand_playable(&self.hand, &hand)?;
+            return PlayHandStatus::Pass;
+            // self.passed_player_ids.insert(self.current_player_id);
+        } 
+            Trick::check_hand_playable(&self.hand, &hand);
             self.hand = hand;
-        }
-        Ok(())
+            PlayHandStatus::SuccessPlay
     }
 
     fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
@@ -60,6 +74,14 @@ impl Trick {
             }
         }
         None
+    }
+
+    fn trick_winner_player_id(&self) -> Option<usize> {
+        if self.passed_player_ids.len() == 3 {
+            Some(self.current_player_id)
+        } else { 
+            None
+        }
     }
 }
 
