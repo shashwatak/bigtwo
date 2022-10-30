@@ -1,17 +1,34 @@
-use std::collections::BTreeSet;
+use std::{
+    collections::BTreeSet,
+    fmt::{Display, Formatter},
+};
 
 use crate::hand::Hand;
-use crate::player::Player;
 
+#[derive(Debug)]
 pub struct Trick {
     pub hand: Hand,
     pub current_player_id: usize,
     pub passed_player_ids: BTreeSet<usize>,
 }
 
+impl Trick {
+    pub fn new(starting_hand: Hand, starting_player: usize) -> Self {
+        Self {
+            hand: starting_hand,
+            current_player_id: 0,
+            passed_player_ids: BTreeSet::new(),
+        }
+    }
+}
+
+impl Display for Trick {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "Current Player: {}", self.current_player_id)
+    }
+}
+
 pub enum PlayHandStatus {
-    GameOver,
-    TrickOver,
     Pass,
     SuccessPlay,
     FailedPlay(InvalidPlayedHand),
@@ -24,21 +41,20 @@ pub enum InvalidPlayedHand {
 
 impl From<InvalidPlayedHand> for PlayHandStatus {
     fn from(e: InvalidPlayedHand) -> Self {
-       Self::FailedPlay(e) 
+        Self::FailedPlay(e)
     }
 }
 
 impl Trick {
-
     fn try_play_hand(&mut self, hand: Hand) -> PlayHandStatus {
         // assert!(!self.passed_player_ids.contains(&self.current_player_id));
         if let Hand::Pass = hand {
             return PlayHandStatus::Pass;
             // self.passed_player_ids.insert(self.current_player_id);
-        } 
-            Trick::check_hand_playable(&self.hand, &hand);
-            self.hand = hand;
-            PlayHandStatus::SuccessPlay
+        }
+        let _ = Trick::check_hand_playable(&self.hand, &hand);
+        self.hand = hand;
+        PlayHandStatus::SuccessPlay
     }
 
     fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
@@ -79,7 +95,7 @@ impl Trick {
     fn trick_winner_player_id(&self) -> Option<usize> {
         if self.passed_player_ids.len() == 3 {
             Some(self.current_player_id)
-        } else { 
+        } else {
             None
         }
     }
