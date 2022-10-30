@@ -42,16 +42,15 @@ impl From<InvalidPlayedHand> for PlayHandStatus {
 
 impl Trick {
     fn try_play_hand(&self, hand: Hand) -> Result<Hand, PlayHandStatus> {
+
         assert!(self.passed_player_ids.len() < 4);
+        assert!(!self.passed_player_ids.contains(&self.current_player_id));
+
         if self.passed_player_ids.len() >= 4 - 1 {
             return Err(PlayHandStatus::TrickOver); 
         }
 
-
-        let hand_err = Hand::check_hand_playable(&self.hand, &hand);
-        if let Err(e) = hand_err {
-            return Err(PlayHandStatus::FailedPlay(e));
-        }
+        Hand::check_hand_playable(&self.hand, &hand)?;
 
         Ok(hand)
     }
@@ -116,28 +115,33 @@ mod tests {
     fn test_try_play_hand() {
 
         // new trick begins with a Three of Clubs (ostensibly by player 0), 
-        // the next player should be 1
         let mut trick = Trick::new("3C".parse().unwrap(), 1);
 
-        // player 1 plays a Three of Spades
+        // plays a Three of Spades
         let hand = trick.try_play_hand("3S".parse().unwrap());
         assert!(matches!(hand, Ok(Hand::Lone(_))));
 
+        // update hand
         trick.hand = hand.unwrap();
 
-        // player 2 incorrectly plays a Three of Diamonds, reject
+        // incorrectly plays a Three of Diamonds, reject
         let hand = trick.try_play_hand("3D".parse().unwrap());
         assert!(matches!(hand, Err(PlayHandStatus::FailedPlay(InvalidPlayedHand::NotHighEnough))));
 
-        // player 2 plays a pair of Three's, reject
-        let hand = trick.try_play_hand("3D 3C".parse().unwrap());
+        // incorrectly plays a pair of Three's, reject
+        let hand = trick.try_play_hand("4H 4D".parse().unwrap());
         assert!(matches!(hand, Err(PlayHandStatus::FailedPlay(InvalidPlayedHand::WrongType))));
 
-        // player 2 passes
+        // passes
         let hand = trick.try_play_hand("".parse().unwrap());
-        println!("{:?}", hand);
         assert!(matches!(hand, Ok(Hand::Pass)));
 
+        trick.passed_player_ids.insert(1);
+        trick.passed_player_ids.insert(2);
+        trick.passed_player_ids.insert(3);
+        trick.current_player_id = 0;
+        let hand = trick.try_play_hand("4C".parse().unwrap());
+        assert!(matches!(hand, Err(PlayHandStatus::TrickOver)));
 
     }
 }
