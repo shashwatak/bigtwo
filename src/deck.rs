@@ -4,6 +4,7 @@ use crate::card::Card;
 
 const NUM_CARDS_IN_DECK: usize = 52;
 
+#[derive(Debug)]
 pub struct Deck {
     // Originally wanted to use a fixed-size array, to keep things on the stack,
     // but this proved difficult because it is not possible to move Cards out of
