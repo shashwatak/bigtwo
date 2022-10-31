@@ -27,7 +27,7 @@ impl Trick {
 
 impl Display for Trick {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "Current Player: {}", self.current_player_id)
+        write!(f, "Current Player: {}\nHand To Beat: {}", self.current_player_id, self.hand)
     }
 }
 
