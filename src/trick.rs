@@ -52,7 +52,7 @@ impl Trick {
         None
     }
 
-    fn check_player_can_play_hand(current: &Hand, attempt: &Hand) -> Result<(), PlayHandError> {
+    fn check_player_can_play_hand(current: &Hand, player: &PassingPlayer, attempt: &Hand) -> Result<(), PlayHandError> {
 
         if !Hand::is_same_type(current, attempt) {
             return Err(PlayHandError::NotMatch);
@@ -62,7 +62,9 @@ impl Trick {
             return Err(PlayHandError::NotHighEnough);
         }
 
-        // Trick::check_player_has_cards(&self.players[self.current_player_id].cards, hand)?;
+        if !Trick::check_player_has_cards(&player.cards, attempt) {
+            return Err(PlayHandError::NotPlayerCards); 
+        }
 
         Ok(())
     }
@@ -126,10 +128,13 @@ mod tests {
 
         // new trick begins with a Three of Clubs (ostensibly by player 0), 
         let mut trick = Trick::new("3C".parse().unwrap(), 1);
+        
+        // player has a few cards
+        let mut player = PassingPlayer { cards: vec!["3S".parse().unwrap(), ] };
 
         // plays a Three of Spades
         let hand : Hand = "3S".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
+        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Ok(())));
 
         // update hand
@@ -137,19 +142,17 @@ mod tests {
 
         // incorrectly plays a Three of Diamonds, reject
         let hand : Hand = "3D".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
+        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::NotHighEnough)));
 
         // incorrectly plays a pair of Three's, reject
         let hand : Hand = "4H 4D".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
+        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::NotMatch)));
 
         // passes
         let hand : Hand = "".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
+        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Ok(_)));
-
-
     }
 }
