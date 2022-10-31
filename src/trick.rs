@@ -1,10 +1,11 @@
 use std::{
     collections::BTreeSet,
-    fmt::{Display, Formatter}, iter::FromIterator,
+    fmt::{Display, Formatter},
+    iter::FromIterator,
 };
 
-use crate::hand::Hand;
 use crate::card::Card;
+use crate::hand::Hand;
 use crate::player::PassingPlayer;
 
 #[derive(Debug)]
@@ -52,25 +53,28 @@ impl Trick {
         None
     }
 
-    fn check_player_can_play_hand(current: &Hand, player: &PassingPlayer, attempt: &Hand) -> Result<(), PlayHandError> {
-
+    fn check_player_can_play_hand(
+        current: &Hand,
+        player: &PassingPlayer,
+        attempt: &Hand,
+    ) -> Result<(), PlayHandError> {
         if !Hand::is_same_type(current, attempt) {
             return Err(PlayHandError::NotMatch);
         }
-        
+
         if current > attempt {
             return Err(PlayHandError::NotHighEnough);
         }
 
         if !Trick::check_player_has_cards(&player.cards, attempt) {
-            return Err(PlayHandError::NotPlayerCards); 
+            return Err(PlayHandError::NotPlayerCards);
         }
 
         Ok(())
     }
 
     fn check_player_has_cards(cards: &Vec<Card>, hand: &Hand) -> bool {
-        let cards : BTreeSet<&Card> = BTreeSet::from_iter(cards.iter());
+        let cards: BTreeSet<&Card> = BTreeSet::from_iter(cards.iter());
 
         match hand {
             Hand::Lone(a) => cards.contains(a),
@@ -78,7 +82,6 @@ impl Trick {
             Hand::Trips(a, b, c) => cards.contains(a) && cards.contains(b) && cards.contains(c),
             Hand::Pass => true,
         }
-
     }
 
     fn trick_winner_player_id(&self) -> Option<usize> {
@@ -124,16 +127,22 @@ mod tests {
     }
 
     #[test]
-    fn test_try_play_hand() {
-
-        // new trick begins with a Three of Clubs (ostensibly by player 0), 
+    fn test_check_player_can_play_hand() {
+        // new trick begins with a Three of Clubs (ostensibly by player 0),
         let mut trick = Trick::new("3C".parse().unwrap(), 1);
+
+        let cards = "3C 3S 4H 4D 4S"
+            .split(' ')
+            .map(|x| x.parse().unwrap())
+            .collect::<Vec<Card>>();
         
         // player has a few cards
-        let mut player = PassingPlayer { cards: vec!["3S".parse().unwrap(), ] };
+        let player = PassingPlayer {
+            cards,
+        };
 
         // plays a Three of Spades
-        let hand : Hand = "3S".parse().unwrap();
+        let hand: Hand = "3S".parse().unwrap();
         let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Ok(())));
 
@@ -141,18 +150,47 @@ mod tests {
         trick.hand = hand;
 
         // incorrectly plays a Three of Diamonds, reject
-        let hand : Hand = "3D".parse().unwrap();
+        let hand: Hand = "3D".parse().unwrap();
         let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::NotHighEnough)));
 
-        // incorrectly plays a pair of Three's, reject
-        let hand : Hand = "4H 4D".parse().unwrap();
+        // incorrectly plays a Pair of Fours, reject
+        let hand: Hand = "4H 4D".parse().unwrap();
         let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::NotMatch)));
+        
+        // incorrectly plays cards they don't have
+        let hand: Hand = "2S".parse().unwrap();
+        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
+        assert!(matches!(res, Err(PlayHandError::NotPlayerCards)));
+
 
         // passes
-        let hand : Hand = "".parse().unwrap();
+        let hand: Hand = "".parse().unwrap();
         let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Ok(_)));
+    }
+
+    #[test]
+    fn test_player_has_cards() {
+        let cards = "3C 3S 4H 4D 4S"
+            .split(' ')
+            .map(|x| x.parse().unwrap())
+            .collect::<Vec<Card>>();
+        
+        let hand : Hand = "3C".parse().unwrap(); 
+        assert!(Trick::check_player_has_cards(&cards, &hand));
+        
+        let hand : Hand = "3S 3C".parse().unwrap(); 
+        assert!(Trick::check_player_has_cards(&cards, &hand));
+        
+        let hand : Hand = "4S 4H 4D".parse().unwrap(); 
+        assert!(Trick::check_player_has_cards(&cards, &hand));
+         
+        let hand : Hand = "3D".parse().unwrap(); 
+        assert!(!Trick::check_player_has_cards(&cards, &hand));
+        
+        let hand : Hand = "4S 4H 4C".parse().unwrap(); 
+        assert!(!Trick::check_player_has_cards(&cards, &hand));
     }
 }
