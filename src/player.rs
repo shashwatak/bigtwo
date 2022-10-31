@@ -6,11 +6,11 @@ pub struct PassingPlayer {
 }
 
 pub trait PlaysHands {
-    fn playHand() -> Hand;
+    fn play_hand() -> Hand;
 }
 
 impl PlaysHands for PassingPlayer {
-    fn playHand() -> Hand {
+    fn play_hand() -> Hand {
         Hand::Pass
     }
 }
