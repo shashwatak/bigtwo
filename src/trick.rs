@@ -3,8 +3,9 @@ use std::{
     fmt::{Display, Formatter}, iter::FromIterator,
 };
 
-use crate::hand::{Hand, InvalidPlayedHand};
+use crate::hand::Hand;
 use crate::card::Card;
+use crate::player::PassingPlayer;
 
 #[derive(Debug)]
 pub struct Trick {
@@ -30,34 +31,13 @@ impl Display for Trick {
 }
 
 #[derive(Debug)]
-pub enum PlayHandStatus {
-    TrickOver,
-    FailedPlay(InvalidPlayedHand),
-}
-
-impl From<InvalidPlayedHand> for PlayHandStatus {
-    fn from(e: InvalidPlayedHand) -> Self {
-        Self::FailedPlay(e)
-    }
+pub enum PlayHandError {
+    NotMatch,
+    NotHighEnough,
+    NotPlayerCards,
 }
 
 impl Trick {
-    fn check_current_player_can_play_hand(&self, hand: &Hand) -> Result<(), PlayHandStatus> {
-
-        assert!(self.passed_player_ids.len() < 4);
-        assert!(!self.passed_player_ids.contains(&self.current_player_id));
-
-        if self.passed_player_ids.len() >= 4 - 1 {
-            return Err(PlayHandStatus::TrickOver); 
-        }
-
-        Hand::check_hand_playable(&self.hand, hand)?;
-
-        // Trick::check_player_has_cards(&self.players[self.current_player_id].cards, hand)?;
-
-        Ok(())
-    }
-
     fn next_player_id(
         current_player_id: usize,
         passed_player_ids: &BTreeSet<usize>,
@@ -70,6 +50,21 @@ impl Trick {
             }
         }
         None
+    }
+
+    fn check_player_can_play_hand(current: &Hand, attempt: &Hand) -> Result<(), PlayHandError> {
+
+        if !Hand::is_same_type(current, attempt) {
+            return Err(PlayHandError::NotMatch);
+        }
+        
+        if current > attempt {
+            return Err(PlayHandError::NotHighEnough);
+        }
+
+        // Trick::check_player_has_cards(&self.players[self.current_player_id].cards, hand)?;
+
+        Ok(())
     }
 
     fn check_player_has_cards(cards: &Vec<Card>, hand: &Hand) -> bool {
@@ -134,7 +129,7 @@ mod tests {
 
         // plays a Three of Spades
         let hand : Hand = "3S".parse().unwrap();
-        let res = trick.check_current_player_can_play_hand(&hand);
+        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
         assert!(matches!(res, Ok(())));
 
         // update hand
@@ -142,26 +137,19 @@ mod tests {
 
         // incorrectly plays a Three of Diamonds, reject
         let hand : Hand = "3D".parse().unwrap();
-        let res = trick.check_current_player_can_play_hand(&hand);
-        assert!(matches!(res, Err(PlayHandStatus::FailedPlay(InvalidPlayedHand::NotHighEnough))));
+        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
+        assert!(matches!(res, Err(PlayHandError::NotHighEnough)));
 
         // incorrectly plays a pair of Three's, reject
         let hand : Hand = "4H 4D".parse().unwrap();
-        let res = trick.check_current_player_can_play_hand(&hand);
-        assert!(matches!(res, Err(PlayHandStatus::FailedPlay(InvalidPlayedHand::WrongType))));
+        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
+        assert!(matches!(res, Err(PlayHandError::NotMatch)));
 
         // passes
         let hand : Hand = "".parse().unwrap();
-        let res = trick.check_current_player_can_play_hand(&hand);
+        let res = Trick::check_player_can_play_hand(&trick.hand, &hand);
         assert!(matches!(res, Ok(_)));
 
-        trick.passed_player_ids.insert(1);
-        trick.passed_player_ids.insert(2);
-        trick.passed_player_ids.insert(3);
-        trick.current_player_id = 0;
-        let hand : Hand = "4C".parse().unwrap();
-        let res = trick.check_current_player_can_play_hand(&hand);
-        assert!(matches!(res, Err(PlayHandStatus::TrickOver)));
 
     }
 }

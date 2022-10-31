@@ -121,35 +121,15 @@ impl FromStr for Hand {
     }
 }
 
-
-#[derive(Debug)]
-pub enum InvalidPlayedHand {
-    WrongType,
-    NotHighEnough,
-}
-
-
 impl Hand {
 
-    fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
+    pub fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
         match (previous, attempted) {
             (_, Hand::Pass) => true,
             (Hand::Lone(_), Hand::Lone(_)) => true,
             (Hand::Pair(_, _), Hand::Pair(_, _)) => true,
             (Hand::Trips(_, _, _), Hand::Trips(_, _, _)) => true,
             _ => false,
-        }
-    }
-
-    pub fn check_hand_playable(previous: &Hand, attempted: &Hand) -> Result<(), InvalidPlayedHand> {
-        if Hand::is_same_type(previous, attempted) {
-            if attempted > previous {
-                Ok(())
-            } else {
-                Err(InvalidPlayedHand::NotHighEnough)
-            }
-        } else {
-            Err(InvalidPlayedHand::WrongType)
         }
     }
 
@@ -209,45 +189,4 @@ mod tests {
         assert!("TS TD TC".parse::<Hand>().unwrap() < "TS TH TC".parse::<Hand>().unwrap());
         assert!("".parse::<Hand>().unwrap() > "2S 2H 2D".parse::<Hand>().unwrap());
     }
-
-    #[test]
-    fn test_check_hand_is_not_playable() {
-        let pass : Hand = "".parse().unwrap();
-
-        let previous: Hand = "3S 3C".to_string().parse().unwrap();
-        let attempted: Hand = "3H 3D".to_string().parse().unwrap();
-        assert!(matches!(
-            Hand::check_hand_playable(&previous, &attempted),
-            Err(InvalidPlayedHand::NotHighEnough)
-        ));
-        assert!(matches!(
-            Hand::check_hand_playable(&previous, &pass),
-            Ok(_),
-        ));
-
-        let previous: Hand = "3S 3C".to_string().parse().unwrap();
-        let attempted: Hand = "4S 4H 4D".to_string().parse().unwrap();
-        assert!(matches!(
-            Hand::check_hand_playable(&previous, &attempted),
-            Err(InvalidPlayedHand::WrongType)
-        ));
-        assert!(matches!(
-            Hand::check_hand_playable(&previous, &pass),
-            Ok(_),
-        ));
-
-
-        let previous: Hand = "3S 3C".to_string().parse().unwrap();
-        let attempted: Hand = "2S".to_string().parse().unwrap();
-        assert!(matches!(
-            Hand::check_hand_playable(&previous, &attempted),
-            Err(InvalidPlayedHand::WrongType)
-        ));
-        assert!(matches!(
-            Hand::check_hand_playable(&previous, &pass),
-            Ok(_),
-        ));
-
-    }
-
 }
