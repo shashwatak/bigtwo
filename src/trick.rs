@@ -134,7 +134,8 @@ mod tests {
 
         // player has a few cards
         let cards = vec_card_from_str("3C 3S 4H 4D 4S");
-        let player = Player { cards };
+        let mut player = Player::default();
+        player.cards = cards;
 
         // plays a Three of Spades
         let hand: Hand = "3S".parse().unwrap();
