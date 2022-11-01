@@ -6,7 +6,7 @@ use std::{
 
 use crate::card::Card;
 use crate::hand::Hand;
-use crate::player::PassingPlayer;
+use crate::player::Player;
 
 #[derive(Debug)]
 pub struct Trick {
@@ -55,7 +55,7 @@ impl Trick {
 
     fn check_player_can_play_hand(
         current: &Hand,
-        player: &PassingPlayer,
+        player: &Player,
         attempt: &Hand,
     ) -> Result<(), PlayHandError> {
         if !Hand::is_same_type(current, attempt) {
@@ -134,7 +134,7 @@ mod tests {
 
         // player has a few cards
         let cards = vec_card_from_str("3C 3S 4H 4D 4S");
-        let player = PassingPlayer { cards };
+        let player = Player { cards };
 
         // plays a Three of Spades
         let hand: Hand = "3S".parse().unwrap();
