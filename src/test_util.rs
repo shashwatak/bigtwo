@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod tests {
-   
+
     use crate::card::Card;
 
     pub fn vec_card_from_str(input: &str) -> Vec<Card> {
@@ -10,4 +10,3 @@ pub mod tests {
             .collect::<Vec<Card>>()
     }
 }
-

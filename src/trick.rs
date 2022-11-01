@@ -27,7 +27,11 @@ impl Trick {
 
 impl Display for Trick {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "Current Player: {}\nHand To Beat: {}", self.current_player_id, self.hand)
+        write!(
+            f,
+            "Current Player: {}\nHand To Beat: {}",
+            self.current_player_id, self.hand
+        )
     }
 }
 
@@ -154,12 +158,11 @@ mod tests {
         let hand: Hand = "4H 4D".parse().unwrap();
         let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::NotMatch)));
-        
+
         // incorrectly plays cards they don't have
         let hand: Hand = "2S".parse().unwrap();
         let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::NotPlayerCards)));
-
 
         // passes
         let hand: Hand = "".parse().unwrap();
@@ -173,17 +176,17 @@ mod tests {
 
         let hand: Hand = "3C".parse().unwrap();
         assert!(Trick::check_player_has_cards(&cards, &hand));
-        
-        let hand : Hand = "3S 3C".parse().unwrap(); 
+
+        let hand: Hand = "3S 3C".parse().unwrap();
         assert!(Trick::check_player_has_cards(&cards, &hand));
-        
-        let hand : Hand = "4S 4H 4D".parse().unwrap(); 
+
+        let hand: Hand = "4S 4H 4D".parse().unwrap();
         assert!(Trick::check_player_has_cards(&cards, &hand));
-         
-        let hand : Hand = "3D".parse().unwrap(); 
+
+        let hand: Hand = "3D".parse().unwrap();
         assert!(!Trick::check_player_has_cards(&cards, &hand));
-        
-        let hand : Hand = "4S 4H 4C".parse().unwrap(); 
+
+        let hand: Hand = "4S 4H 4C".parse().unwrap();
         assert!(!Trick::check_player_has_cards(&cards, &hand));
     }
 }

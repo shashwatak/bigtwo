@@ -10,7 +10,7 @@ pub struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
-            cards : vec!(),
+            cards: vec![],
             submit_hand: PLAY_SMALLEST_SINGLE_OR_PASS,
         }
     }
@@ -32,7 +32,5 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
 mod tests {
 
     #[test]
-    fn test_play_smallest_single_or_pass() {
-        
-    }
+    fn test_play_smallest_single_or_pass() {}
 }

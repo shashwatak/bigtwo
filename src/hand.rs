@@ -122,7 +122,6 @@ impl FromStr for Hand {
 }
 
 impl Hand {
-
     pub fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
         match (previous, attempted) {
             (_, Hand::Pass) => true,
@@ -132,9 +131,7 @@ impl Hand {
             _ => false,
         }
     }
-
 }
-
 
 #[cfg(test)]
 mod tests {
