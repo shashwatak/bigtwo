@@ -2,6 +2,7 @@ mod card;
 mod deck;
 mod hand;
 mod player;
+mod test_util;
 mod trick;
 
 use crate::deck::Deck;

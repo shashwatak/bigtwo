@@ -97,6 +97,7 @@ impl Trick {
 mod tests {
 
     use super::*;
+    use crate::test_util::tests::vec_card_from_str;
 
     #[test]
     fn test_next_player_id() {
@@ -131,15 +132,9 @@ mod tests {
         // new trick begins with a Three of Clubs (ostensibly by player 0),
         let mut trick = Trick::new("3C".parse().unwrap(), 1);
 
-        let cards = "3C 3S 4H 4D 4S"
-            .split(' ')
-            .map(|x| x.parse().unwrap())
-            .collect::<Vec<Card>>();
-        
         // player has a few cards
-        let player = PassingPlayer {
-            cards,
-        };
+        let cards = vec_card_from_str("3C 3S 4H 4D 4S");
+        let player = PassingPlayer { cards };
 
         // plays a Three of Spades
         let hand: Hand = "3S".parse().unwrap();
@@ -173,12 +168,9 @@ mod tests {
 
     #[test]
     fn test_player_has_cards() {
-        let cards = "3C 3S 4H 4D 4S"
-            .split(' ')
-            .map(|x| x.parse().unwrap())
-            .collect::<Vec<Card>>();
-        
-        let hand : Hand = "3C".parse().unwrap(); 
+        let cards = vec_card_from_str("3C 3S 4H 4D 4S");
+
+        let hand: Hand = "3C".parse().unwrap();
         assert!(Trick::check_player_has_cards(&cards, &hand));
         
         let hand : Hand = "3S 3C".parse().unwrap(); 
