@@ -19,9 +19,11 @@ fn main() {
     }
     let starting_player_idx = find_player_with_three_of_clubs(&players);
     let starting_player = &players[starting_player_idx];
-    let starting_hand = (starting_player.submit_hand)(&"".parse().unwrap(), &starting_player.cards);
-    let trick = Trick::new(starting_hand, starting_player_idx);
-    println!("{}", trick);
+    // let starting_hand = (starting_player.submit_hand)(&"".parse().unwrap(), &starting_player.cards);
+    // let starting_hand = (starting_player.start_game)(&starting_player.cards);
+
+    // let trick = Trick::new(starting_hand, starting_player_idx);
+    // println!("{}", trick);
 }
 
 fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
@@ -31,6 +33,9 @@ fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
         let index = player_index % 4;
         players[index].cards.push(card);
         player_index += 1;
+    }
+    for player in players {
+        player.cards.sort();
     }
     assert_eq!(deck.cards.len(), 0);
 }
