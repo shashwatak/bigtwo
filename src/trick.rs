@@ -17,6 +17,9 @@ pub struct Trick {
 
 impl Trick {
     pub fn new(starting_hand: Hand, next_player_id: usize) -> Self {
+        if let Hand::Pass = starting_hand {
+            panic!("Starting Hand cannot be Pass");
+        }
         Self {
             hand: starting_hand,
             current_player_id: next_player_id,
