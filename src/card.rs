@@ -9,6 +9,11 @@ use std::str::FromStr;
 
 use self::{number::ParseNumberError, suit::ParseSuitError};
 
+pub const THREE_OF_CLUBS: Card = Card {
+    number: Number::Three,
+    suit: Suit::Clubs,
+};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
     pub number: Number,
