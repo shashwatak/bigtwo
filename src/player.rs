@@ -58,9 +58,5 @@ mod tests {
         let cards = vec_card_from_str("3C 4C 5D");
         let hand = USE_THREE_OF_CLUBS(&cards);
         assert!(matches!(hand, Hand::Lone(a) if a == THREE_OF_CLUBS));
-        // match hand {
-        //     Hand::Lone(a) if a == THREE_OF_CLUBS => (),
-        //     _ => assert!(false),
-        // }
     }
 }
