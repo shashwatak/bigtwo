@@ -63,7 +63,7 @@ impl Hand {
         }
     }
 
-    fn try_pair(first: Card, second: Card) -> Result<Hand, InvalidHandError> {
+    pub fn try_pair(first: Card, second: Card) -> Result<Hand, InvalidHandError> {
         if first.number == second.number {
             Ok(Hand::Pair(first, second))
         } else {
@@ -71,7 +71,7 @@ impl Hand {
         }
     }
 
-    fn try_trips(first: Card, second: Card, third: Card) -> Result<Hand, InvalidHandError> {
+    pub fn try_trips(first: Card, second: Card, third: Card) -> Result<Hand, InvalidHandError> {
         if first.number == second.number && second.number == third.number {
             Ok(Hand::Trips(first, second, third))
         } else {
@@ -79,7 +79,7 @@ impl Hand {
         }
     }
 
-    fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
+    pub fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
         let mut unique_cards: BTreeSet<&Card> = BTreeSet::new();
         for card in cards {
             unique_cards.insert(&card);
