@@ -5,6 +5,8 @@ mod player;
 mod test_util;
 mod trick;
 
+use std::collections::BTreeSet;
+
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
 use crate::hand::Hand;
@@ -19,11 +21,10 @@ fn main() {
     }
     let starting_player_idx = find_player_with_three_of_clubs(&players);
     let starting_player = &players[starting_player_idx];
-    // let starting_hand = (starting_player.submit_hand)(&"".parse().unwrap(), &starting_player.cards);
-    // let starting_hand = (starting_player.start_game)(&starting_player.cards);
-
-    // let trick = Trick::new(starting_hand, starting_player_idx);
-    // println!("{}", trick);
+    let starting_hand = (starting_player.start_game)(&starting_player.cards);
+    let next_player_idx = Trick::next_player_id(starting_player_idx, &BTreeSet::new()).unwrap();
+    let trick = Trick::new(starting_hand, next_player_idx);
+    println!("{}", trick);
 }
 
 fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {

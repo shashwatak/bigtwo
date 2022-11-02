@@ -5,6 +5,7 @@ use crate::{card::{Card, THREE_OF_CLUBS}, hand::Hand};
 pub struct Player {
     pub cards: Vec<Card>,
     pub submit_hand: fn(&Hand, &Vec<Card>) -> Hand,
+    pub start_game: fn(&Vec<Card>) -> Hand,
 }
 
 impl Default for Player {
@@ -12,6 +13,7 @@ impl Default for Player {
         Self {
             cards: vec![],
             submit_hand: PLAY_SMALLEST_SINGLE_OR_PASS,
+            start_game: USE_THREE_OF_CLUBS,
         }
     }
 }
@@ -41,8 +43,8 @@ pub const USE_THREE_OF_CLUBS: fn(&Vec<Card>) -> Hand = |cards| {
         }
         _ => panic!("oop"),
     }
-    
 };
+
 pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, cards| Hand::Pass;
 
 #[cfg(test)]
@@ -58,5 +60,14 @@ mod tests {
         let cards = vec_card_from_str("3C 4C 5D");
         let hand = USE_THREE_OF_CLUBS(&cards);
         assert!(matches!(hand, Hand::Lone(a) if a == THREE_OF_CLUBS));
+
+        let cards = vec_card_from_str("3C 3D 5D");
+        let hand = USE_THREE_OF_CLUBS(&cards);
+        assert!(matches!(hand, Hand::Pair(_, a) if a == THREE_OF_CLUBS));
+
+        let cards = vec_card_from_str("3C 3D 3S");
+        let hand = USE_THREE_OF_CLUBS(&cards);
+        assert!(matches!(hand, Hand::Trips(_, _, a) if a == THREE_OF_CLUBS));
+
     }
 }

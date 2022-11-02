@@ -46,7 +46,7 @@ pub enum PlayHandError {
 }
 
 impl Trick {
-    fn next_player_id(
+    pub fn next_player_id(
         current_player_id: usize,
         passed_player_ids: &BTreeSet<usize>,
     ) -> Option<usize> {
