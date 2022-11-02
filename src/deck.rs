@@ -2,8 +2,6 @@ use crate::card::number::Number;
 use crate::card::suit::Suit;
 use crate::card::Card;
 
-const NUM_CARDS_IN_DECK: usize = 52;
-
 #[derive(Debug)]
 pub struct Deck {
     // Originally wanted to use a fixed-size array, to keep things on the stack,
@@ -23,9 +21,11 @@ impl Deck {
                 cards.push(Card {
                     number: *number,
                     suit: *suit,
-                })
+                });
             }
         }
+
+        cards.reverse();
         Deck { cards }
     }
 }
@@ -36,6 +36,8 @@ mod tests {
     use std::collections::BTreeSet;
 
     use super::*;
+
+    const NUM_CARDS_IN_DECK: usize = 52;
 
     #[test]
     fn test_new_deck() {
