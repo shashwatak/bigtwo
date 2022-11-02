@@ -18,11 +18,13 @@ impl Deck {
         let mut cards: Vec<Card> = Vec::new();
         let numbers = &Number::all();
         let suits = &Suit::all();
-        for i in 0..NUM_CARDS_IN_DECK {
-            cards.push(Card {
-                number: numbers[i / 4],
-                suit: suits[i % 4],
-            });
+        for number in numbers {
+            for suit in suits {
+                cards.push(Card {
+                    number: *number,
+                    suit: *suit,
+                })
+            }
         }
         Deck { cards }
     }
