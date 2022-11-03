@@ -74,24 +74,12 @@ impl Trick {
             return Err(PlayHandError::NotHighEnough);
         }
 
-        if !Trick::check_player_has_cards(&player.cards, attempt) {
+        if !player.has_cards(attempt) {
             return Err(PlayHandError::NotPlayerCards);
         }
 
         Ok(())
     }
-
-    fn check_player_has_cards(cards: &Vec<Card>, hand: &Hand) -> bool {
-        let cards: BTreeSet<&Card> = BTreeSet::from_iter(cards.iter());
-
-        match hand {
-            Hand::Lone(a) => cards.contains(a),
-            Hand::Pair(a, b) => cards.contains(a) && cards.contains(b),
-            Hand::Trips(a, b, c) => cards.contains(a) && cards.contains(b) && cards.contains(c),
-            Hand::Pass => true,
-        }
-    }
-
 }
 
 #[cfg(test)]
@@ -168,23 +156,4 @@ mod tests {
         assert!(matches!(res, Ok(_)));
     }
 
-    #[test]
-    fn test_player_has_cards() {
-        let cards = vec_card_from_str("3C 3S 4H 4D 4S");
-
-        let hand: Hand = "3C".parse().unwrap();
-        assert!(Trick::check_player_has_cards(&cards, &hand));
-
-        let hand: Hand = "3S 3C".parse().unwrap();
-        assert!(Trick::check_player_has_cards(&cards, &hand));
-
-        let hand: Hand = "4S 4H 4D".parse().unwrap();
-        assert!(Trick::check_player_has_cards(&cards, &hand));
-
-        let hand: Hand = "3D".parse().unwrap();
-        assert!(!Trick::check_player_has_cards(&cards, &hand));
-
-        let hand: Hand = "4S 4H 4C".parse().unwrap();
-        assert!(!Trick::check_player_has_cards(&cards, &hand));
-    }
 }

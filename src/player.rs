@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::collections::BTreeSet;
 
 use crate::{card::{Card, THREE_OF_CLUBS}, hand::Hand};
 
@@ -57,6 +58,23 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
     Hand::Pass
 };
 
+
+impl Player {
+    pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
+    }
+    
+    pub fn has_cards(&self, hand: &Hand) -> bool {
+        let cards: BTreeSet<&Card> = BTreeSet::from_iter(self.cards.iter());
+
+        match hand {
+            Hand::Lone(a) => cards.contains(a),
+            Hand::Pair(a, b) => cards.contains(a) && cards.contains(b),
+            Hand::Trips(a, b, c) => cards.contains(a) && cards.contains(b) && cards.contains(c),
+            Hand::Pass => true,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -96,5 +114,27 @@ mod tests {
         let hand = USE_THREE_OF_CLUBS(&cards);
         assert!(matches!(hand, Hand::Trips(_, _, a) if a == THREE_OF_CLUBS));
 
+    }
+
+    #[test]
+    fn test_has_cards() {
+        let cards = vec_card_from_str("3C 3S 4H 4D 4S");
+        let mut player = Player::default();
+        player.cards = cards;
+
+        let hand: Hand = "3C".parse().unwrap();
+        assert!(player.has_cards(&hand));
+
+        let hand: Hand = "3S 3C".parse().unwrap();
+        assert!(player.has_cards(&hand));
+
+        let hand: Hand = "4S 4H 4D".parse().unwrap();
+        assert!(player.has_cards(&hand));
+
+        let hand: Hand = "3D".parse().unwrap();
+        assert!(!player.has_cards(&hand));
+
+        let hand: Hand = "4S 4H 4C".parse().unwrap();
+        assert!(!player.has_cards(&hand));
     }
 }
