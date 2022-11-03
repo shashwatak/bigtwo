@@ -84,15 +84,15 @@ mod tests {
     }
 
     fn test_use_three_of_clubs() {
-        let cards = vec_card_from_str("3C 4C 5D");
+        let cards = vec_card_from_str("3C 4C 5D 2S");
         let hand = USE_THREE_OF_CLUBS(&cards);
         assert!(matches!(hand, Hand::Lone(a) if a == THREE_OF_CLUBS));
 
-        let cards = vec_card_from_str("3C 3D 5D");
+        let cards = vec_card_from_str("3C 3D 5D 2S");
         let hand = USE_THREE_OF_CLUBS(&cards);
         assert!(matches!(hand, Hand::Pair(_, a) if a == THREE_OF_CLUBS));
 
-        let cards = vec_card_from_str("3C 3D 3S");
+        let cards = vec_card_from_str("3C 3D 3S 2S");
         let hand = USE_THREE_OF_CLUBS(&cards);
         assert!(matches!(hand, Hand::Trips(_, _, a) if a == THREE_OF_CLUBS));
 
