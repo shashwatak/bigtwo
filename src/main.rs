@@ -22,7 +22,7 @@ fn main() {
     let starting_player_idx = find_player_with_three_of_clubs(&players);
     let starting_player = &players[starting_player_idx];
     let starting_hand = (starting_player.start_game)(&starting_player.cards);
-    let next_player_idx = Trick::next_player_id(starting_player_idx, &BTreeSet::new()).unwrap();
+    let next_player_idx = Trick::next_player_id(starting_player_idx, &BTreeSet::new());
     let trick = Trick::new(starting_hand, next_player_idx);
     println!("{}", trick);
 }
