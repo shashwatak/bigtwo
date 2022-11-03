@@ -61,7 +61,26 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
 };
 
 impl Player {
-    pub fn remove_hand_from_cards(&mut self, hand: &Hand) {}
+    pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
+        assert!(self.has_cards(hand));
+        match hand {
+            Hand::Lone(a) => self.remove_cards_from_cards(&[*a]),
+            Hand::Pair(a, b) => self.remove_cards_from_cards(&[*a, *b]),
+            Hand::Trips(a, b, c) => self.remove_cards_from_cards(&[*a, *b, *c]),
+            _ => unreachable!(),
+        }
+    }
+
+    fn remove_cards_from_cards(&mut self, cards_to_remove: &[Card]) {
+        for to_remove in cards_to_remove {
+            let index = self
+                .cards
+                .iter()
+                .position(|card| *card == *to_remove)
+                .unwrap();
+            self.cards.remove(index);
+        }
+    }
 
     pub fn has_cards(&self, hand: &Hand) -> bool {
         let cards: BTreeSet<&Card> = BTreeSet::from_iter(self.cards.iter());
@@ -140,5 +159,16 @@ mod tests {
 
         let hand: Hand = "4S 4H 4C".parse().unwrap();
         assert!(!player.has_cards(&hand));
+    }
+
+    #[test]
+    fn test_remove_cards_from_hand() {
+        let mut player = Player::default();
+        player.cards = vec_card_from_str("3D 3S 5S 6S");
+        player.remove_hand_from_cards(&"3S 3D".parse().unwrap());
+        assert!(!player.cards.contains(&"3S".parse().unwrap()));
+        assert!(!player.cards.contains(&"3D".parse().unwrap()));
+        assert!(player.cards.contains(&"5S".parse().unwrap()));
+        assert!(player.cards.contains(&"6S".parse().unwrap()));
     }
 }
