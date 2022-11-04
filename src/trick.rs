@@ -144,7 +144,7 @@ mod tests {
 
     }
 
-
+    #[test]
     fn test_trick_step() {
 
         // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 3C, P1 is
@@ -152,37 +152,45 @@ mod tests {
         let starting_hand : Hand = "6D".parse().unwrap(); 
         let mut players = <[Player; 4]>::default();
         players[0].cards = vec_card_from_str("AS 2S");
-        players[1].cards = vec_card_from_str("7D 9H");
+        players[1].cards = vec_card_from_str("3D 4H");
         players[2].cards = vec_card_from_str("3H 4H");
-        players[3].cards = vec_card_from_str("3S 4S");
+        players[3].cards = vec_card_from_str("7D 4S");
         let next_player_id : usize = 1;
         let mut trick : Trick = Trick::new(starting_hand, next_player_id);
 
         // P1 plays 7D, then P2
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, TrickStepStatus::Played));
+        assert!(matches!(step_status, TrickStepStatus::Passed));
         match trick.hand {
-            Hand::Lone(a) => assert_eq!(a, "7D".parse().unwrap()),
+            Hand::Lone(a) => assert_eq!(a, "6D".parse().unwrap()),
             a => panic!("{}", a),
         }
+        assert_eq!(trick.passed_player_ids.len(), 1);
+        assert!(trick.passed_player_ids.contains(&1));
         assert_eq!(trick.current_player_id, 2);
 
         // P2 must pass, then P3
         let step_status = trick.step(&mut players);
         assert!(matches!(step_status, TrickStepStatus::Passed));
         match trick.hand {
+            Hand::Lone(a) => assert_eq!(a, "6D".parse().unwrap()),
+            a => panic!("{}", a),
+        }
+        assert_eq!(trick.passed_player_ids.len(), 2);
+        assert!(trick.passed_player_ids.contains(&1));
+        assert!(trick.passed_player_ids.contains(&2));
+        assert_eq!(trick.current_player_id, 3);
+
+        // P3 plays 7D, then to P0
+        let step_status = trick.step(&mut players);
+        assert!(matches!(step_status, TrickStepStatus::Played));
+        match trick.hand {
             Hand::Lone(a) => assert_eq!(a, "7D".parse().unwrap()),
             a => panic!("{}", a),
         }
-        assert_eq!(trick.current_player_id, 3);
-
-        // P3 must pass, then back to P0
-        let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, TrickStepStatus::Passed));
-        match trick.hand {
-            Hand::Lone(a) => assert_eq!(a, "3D".parse().unwrap()),
-            a => panic!("{}", a),
-        }
+        assert_eq!(trick.passed_player_ids.len(), 2);
+        assert!(trick.passed_player_ids.contains(&1));
+        assert!(trick.passed_player_ids.contains(&2));
         assert_eq!(trick.current_player_id, 0);
 
 
@@ -193,6 +201,9 @@ mod tests {
             Hand::Lone(a) => assert_eq!(a, "AS".parse().unwrap()),
             a => panic!("{}", a),
         }
+        assert_eq!(trick.passed_player_ids.len(), 2);
+        assert!(trick.passed_player_ids.contains(&1));
+        assert!(trick.passed_player_ids.contains(&2));
         assert_eq!(trick.current_player_id, 3);
 
         // P3 passes, Trick is Over and P0 won the Trick
@@ -205,6 +216,10 @@ mod tests {
             Hand::Lone(a) => assert_eq!(a, "AS".parse().unwrap()),
             a => panic!("{}", a),
         }
-        assert_eq!(trick.current_player_id, 2);
+        assert_eq!(trick.passed_player_ids.len(), 3);
+        assert!(trick.passed_player_ids.contains(&1));
+        assert!(trick.passed_player_ids.contains(&2));
+        assert!(trick.passed_player_ids.contains(&3));
+        assert_eq!(trick.current_player_id, 3);
     }
 }
