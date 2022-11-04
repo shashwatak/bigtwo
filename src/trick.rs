@@ -51,8 +51,7 @@ impl Trick {
         let attempt = loop {
             let attempt = (player.submit_hand)(&self.hand, &player.cards);
 
-            let is_attempt_allowed =
-                check_player_can_play_hand(&self.hand, &player, &attempt);
+            let is_attempt_allowed = check_player_can_play_hand(&self.hand, &player, &attempt);
 
             match is_attempt_allowed {
                 Ok(()) => break attempt,
@@ -111,7 +110,6 @@ impl Trick {
         }
         unreachable!();
     }
-
 }
 
 #[cfg(test)]
@@ -141,22 +139,20 @@ mod tests {
         let has_passed: BTreeSet<usize> = BTreeSet::from([0, 3]);
         let next = Trick::next_player_id(current, &has_passed);
         assert_eq!(next, 1);
-
     }
 
     #[test]
     fn test_trick_step() {
-
         // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 3C, P1 is
         // next
-        let starting_hand : Hand = "6D".parse().unwrap(); 
+        let starting_hand: Hand = "6D".parse().unwrap();
         let mut players = <[Player; 4]>::default();
         players[0].cards = vec_card_from_str("AS 2S");
         players[1].cards = vec_card_from_str("3D 4H");
         players[2].cards = vec_card_from_str("3H 4H");
         players[3].cards = vec_card_from_str("7D 4S");
-        let next_player_id : usize = 1;
-        let mut trick : Trick = Trick::new(starting_hand, next_player_id);
+        let next_player_id: usize = 1;
+        let mut trick: Trick = Trick::new(starting_hand, next_player_id);
 
         // P1 plays 7D, then P2
         let step_status = trick.step(&mut players);
@@ -192,7 +188,6 @@ mod tests {
         assert!(trick.passed_player_ids.contains(&1));
         assert!(trick.passed_player_ids.contains(&2));
         assert_eq!(trick.current_player_id, 0);
-
 
         // P0 plays Ace of Spades, then to P3 (skipping P1 and P2 who passed)
         let step_status = trick.step(&mut players);

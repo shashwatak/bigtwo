@@ -21,26 +21,24 @@ impl Display for PlayHandError {
 }
 
 pub fn check_player_can_play_hand(
-        current: &Hand,
-        player: &Player,
-        attempt: &Hand,
-    ) -> Result<(), PlayHandError> {
-        if !Hand::is_same_type(current, attempt) {
-            return Err(PlayHandError::NotMatch);
-        }
-
-        if current > attempt {
-            return Err(PlayHandError::NotHighEnough);
-        }
-
-        if !player.has_cards(attempt) {
-            return Err(PlayHandError::NotPlayerCards);
-        }
-
-        Ok(())
+    current: &Hand,
+    player: &Player,
+    attempt: &Hand,
+) -> Result<(), PlayHandError> {
+    if !Hand::is_same_type(current, attempt) {
+        return Err(PlayHandError::NotMatch);
     }
 
+    if current > attempt {
+        return Err(PlayHandError::NotHighEnough);
+    }
 
+    if !player.has_cards(attempt) {
+        return Err(PlayHandError::NotPlayerCards);
+    }
+
+    Ok(())
+}
 
 #[cfg(test)]
 mod tests {
