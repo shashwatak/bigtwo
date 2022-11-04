@@ -1,8 +1,12 @@
+mod check_player_can_play_hand;
+
 use std::{
     collections::BTreeSet,
     fmt::{Display, Formatter},
     iter::FromIterator,
 };
+
+use check_player_can_play_hand::check_player_can_play_hand;
 
 use crate::card::Card;
 use crate::hand::Hand;
@@ -48,7 +52,7 @@ impl Trick {
             let attempt = (player.submit_hand)(&self.hand, &player.cards);
 
             let is_attempt_allowed =
-                Trick::check_player_can_play_hand(&self.hand, &player, &attempt);
+                check_player_can_play_hand(&self.hand, &player, &attempt);
 
             match is_attempt_allowed {
                 Ok(()) => break attempt,
@@ -91,23 +95,6 @@ impl Display for Trick {
     }
 }
 
-#[derive(Debug)]
-pub enum PlayHandError {
-    NotMatch,
-    NotHighEnough,
-    NotPlayerCards,
-}
-
-impl Display for PlayHandError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        match self {
-            Self::NotMatch => write!(f, "wrong number of cards"),
-            Self::NotHighEnough => write!(f, "highest is not high enough"),
-            Self::NotPlayerCards => write!(f, "these cards are not in the players hand"),
-        }
-    }
-}
-
 impl Trick {
     pub fn next_player_id(current_player_id: usize, passed_player_ids: &BTreeSet<usize>) -> usize {
         assert!(current_player_id < 4);
@@ -125,25 +112,6 @@ impl Trick {
         unreachable!();
     }
 
-    fn check_player_can_play_hand(
-        current: &Hand,
-        player: &Player,
-        attempt: &Hand,
-    ) -> Result<(), PlayHandError> {
-        if !Hand::is_same_type(current, attempt) {
-            return Err(PlayHandError::NotMatch);
-        }
-
-        if current > attempt {
-            return Err(PlayHandError::NotHighEnough);
-        }
-
-        if !player.has_cards(attempt) {
-            return Err(PlayHandError::NotPlayerCards);
-        }
-
-        Ok(())
-    }
 }
 
 #[cfg(test)]
@@ -176,44 +144,6 @@ mod tests {
 
     }
 
-    #[test]
-    fn test_check_player_can_play_hand() {
-        // new trick begins with a Three of Clubs (ostensibly by player 0),
-        let mut trick = Trick::new("3C".parse().unwrap(), 1);
-
-        // player has a few cards
-        let cards = vec_card_from_str("3C 3S 4H 4D 4S");
-        let mut player = Player::default();
-        player.cards = cards;
-
-        // plays a Three of Spades
-        let hand: Hand = "3S".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
-        assert!(matches!(res, Ok(())));
-
-        // update hand
-        trick.hand = hand;
-
-        // incorrectly plays a Three of Diamonds, reject
-        let hand: Hand = "3D".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::NotHighEnough)));
-
-        // incorrectly plays a Pair of Fours, reject
-        let hand: Hand = "4H 4D".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::NotMatch)));
-
-        // incorrectly plays cards they don't have
-        let hand: Hand = "2S".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::NotPlayerCards)));
-
-        // passes
-        let hand: Hand = "".parse().unwrap();
-        let res = Trick::check_player_can_play_hand(&trick.hand, &player, &hand);
-        assert!(matches!(res, Ok(_)));
-    }
 
     fn test_trick_step() {
 
