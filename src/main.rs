@@ -7,6 +7,8 @@ mod trick;
 
 use std::collections::BTreeSet;
 
+use trick::StepStatus;
+
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
 use crate::player::Player;
@@ -18,12 +20,24 @@ fn main() {
     for (index, player) in players.iter().enumerate() {
         println!("Player {}: {}", index, player);
     }
-    let starting_player_idx = find_player_with_three_of_clubs(&players);
-    let starting_player = &players[starting_player_idx];
-    let starting_hand = (starting_player.start_game)(&starting_player.cards);
-    let next_player_idx = Trick::next_player_id(starting_player_idx, &BTreeSet::new());
-    let trick = Trick::new(starting_hand, next_player_idx);
-    println!("{}", trick);
+    let mut starting_player_idx = find_player_with_three_of_clubs(&players);
+    let mut is_first_trick = true;
+    loop { 
+        let mut trick = Trick::start(starting_player_idx, &mut players, is_first_trick).unwrap();
+        is_first_trick = false;
+        loop {
+            println!("{}", trick);
+            println!("{}", players[trick.current_player_id]);
+            let trick_step = trick.step(&mut players);
+            if let StepStatus::TrickOver(p) = trick_step {
+                println!("Trick Over, Player {p} gets to start next trick");
+                break;
+            } else if let StepStatus::GameOver(p) = trick_step {
+                println!("Game Over, Player {p} wins!!");
+                return;
+            }
+        }
+    }
 }
 
 fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
