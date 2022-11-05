@@ -25,7 +25,7 @@ impl Default for Player {
 }
 
 fn cards_to_string(cards: &Vec<Card>) -> String {
-    cards.iter().map(|card| card.to_string()).collect()
+    cards.iter().map(|card| format!(" [{}] ", card.to_string())).collect()
 }
 
 impl Display for Player {
