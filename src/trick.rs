@@ -2,6 +2,7 @@ mod check_player_can_play_hand;
 use check_player_can_play_hand::check_player_can_play_hand;
 
 mod next_player_id;
+use next_player_id::next_player_id;
 
 use std::{
     collections::BTreeSet,
@@ -73,7 +74,7 @@ impl Trick {
         if player.cards.len() == 0 {
             Err(StartStatus::GameOver(starting_player_id))
         } else {
-            let next_player_id = Trick::next_player_id(starting_player_id, &BTreeSet::new());
+            let next_player_id = next_player_id(starting_player_id, &BTreeSet::new());
             trick = Trick::new(starting_hand, next_player_id);
             Ok(trick)
         }
@@ -89,7 +90,7 @@ impl Trick {
 
         let submitted_hand = Trick::get_submitted_hand(player, &self.hand.last().unwrap());
 
-        let next_player_id = Trick::next_player_id(self.current_player_id, &self.passed_player_ids);
+        let next_player_id = next_player_id(self.current_player_id, &self.passed_player_ids);
 
         if let Hand::Pass = submitted_hand {
             self.passed_player_ids.insert(self.current_player_id);
@@ -131,7 +132,7 @@ impl Display for Trick {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Current Player: {}\nHand To Beat: {}",
+            "Current Player: {} \nHand To Beat: {}",
             self.current_player_id, self.hand.last().unwrap()
         )
     }
