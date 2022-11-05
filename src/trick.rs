@@ -6,7 +6,7 @@ use std::{
     fmt::{Display, Formatter},
 };
 
-
+use crate::card::THREE_OF_CLUBS;
 use crate::hand::Hand;
 use crate::player::Player;
 
@@ -15,6 +15,11 @@ pub struct Trick {
     pub hand: Hand,
     pub current_player_id: usize,
     pub passed_player_ids: BTreeSet<usize>,
+}
+
+#[derive(Debug)]
+pub enum TrickStartStatus {
+    GameOver(usize),
 }
 
 #[derive(Debug)]
@@ -35,6 +40,39 @@ impl Trick {
             hand: starting_hand,
             current_player_id: next_player_id,
             passed_player_ids: BTreeSet::new(),
+        }
+    }
+
+    pub fn start(
+        starting_player_id: usize,
+        players: &mut [Player; 4],
+        is_first: bool,
+    ) -> Result<Self, TrickStartStatus> {
+        let player = &mut players[starting_player_id];
+        let starting_hand: Hand;
+        let trick: Trick;
+        if is_first {
+            starting_hand = loop {
+                assert_eq!(player.cards[0], THREE_OF_CLUBS);
+                let attempt = (player.start_game)(&player.cards);
+                match attempt {
+                    Hand::Trips(_, _, a) if a == THREE_OF_CLUBS => break attempt,
+                    Hand::Pair(_, a) if a == THREE_OF_CLUBS => break attempt,
+                    Hand::Lone(a) if a == THREE_OF_CLUBS => break attempt,
+                    _ => println!("must play a hand that includes the Three of Clubs"),
+                }
+            };
+        } else {
+            starting_hand = (player.start_trick)(&player.cards);
+        }
+
+        player.remove_hand_from_cards(&starting_hand);
+        if player.cards.len() == 0 {
+            Err(TrickStartStatus::GameOver(starting_player_id))
+        } else {
+            let next_player_id = Trick::next_player_id(starting_player_id, &BTreeSet::new());
+            trick = Trick::new(starting_hand, next_player_id);
+            Ok(trick)
         }
     }
 
@@ -140,17 +178,67 @@ mod tests {
     }
 
     #[test]
-    fn test_trick_step() {
-        // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 3C, P1 is
+    fn test_trick_start() {
+        // setup a trick where 4 players are dealt cards, P1 initializes the Trick with 3C, P2 is
         // next
-        let starting_hand: Hand = "6D".parse().unwrap();
         let mut players = <[Player; 4]>::default();
-        players[0].cards = vec_card_from_str("AS 2S");
+        players[0].cards = vec_card_from_str("AS");
+        players[1].cards = vec_card_from_str("3C 4D 7S 8D");
+        players[2].cards = vec_card_from_str("3H");
+        players[3].cards = vec_card_from_str("7D");
+        let starting_player_id: usize = 1;
+        let trick: Trick = Trick::start(starting_player_id, &mut players, true).unwrap();
+
+        match trick.hand {
+            Hand::Lone(a) => assert_eq!(a, "3C".parse().unwrap()),
+            a => panic!("{}", a),
+        }
+        assert_eq!(trick.passed_player_ids.len(), 0);
+        assert_eq!(trick.current_player_id, 2);
+        assert_eq!(players[starting_player_id].cards.len(), 3);
+
+
+        // setup a trick where 4 players are dealt cards, P1 initializes the Trick with 4D, P2 is
+        // next
+        let mut players = <[Player; 4]>::default();
+        players[0].cards = vec_card_from_str("AS");
+        players[1].cards = vec_card_from_str("4D 7S");
+        players[2].cards = vec_card_from_str("3H");
+        players[3].cards = vec_card_from_str("7D");
+        let starting_player_id: usize = 1;
+        let trick: Trick = Trick::start(starting_player_id, &mut players, false).unwrap();
+
+        match trick.hand {
+            Hand::Lone(a) => assert_eq!(a, "4D".parse().unwrap()),
+            a => panic!("{}", a),
+        }
+        assert_eq!(trick.passed_player_ids.len(), 0);
+        assert_eq!(trick.current_player_id, 2);
+        assert_eq!(players[starting_player_id].cards.len(), 1);
+
+        // setup a trick where the starting player will win as soon as they initialize the trick
+        let mut players = <[Player; 4]>::default();
+        players[0].cards = vec_card_from_str("2S");
+        players[1].cards = vec_card_from_str("3D");
+        players[2].cards = vec_card_from_str("3H");
+        players[3].cards = vec_card_from_str("7D");
+        let starting_player_id: usize = 2;
+        let trick_start = Trick::start(starting_player_id, &mut players, false);
+        assert!(matches!(trick_start, Err(TrickStartStatus::GameOver(p)) if p == starting_player_id));
+
+    }
+
+    #[test]
+    fn test_trick_step() {
+        // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 6D, P1 is
+        // next
+        let mut players = <[Player; 4]>::default();
+        players[0].cards = vec_card_from_str("6D AS 2S");
         players[1].cards = vec_card_from_str("3D 4H");
         players[2].cards = vec_card_from_str("3H 4H");
         players[3].cards = vec_card_from_str("7D 4S");
-        let next_player_id: usize = 1;
-        let mut trick: Trick = Trick::new(starting_hand, next_player_id);
+        let starting_player_id: usize = 0;
+        let mut trick: Trick = Trick::start(starting_player_id, &mut players, false).unwrap();
 
         // P1 plays 7D, then P2
         let step_status = trick.step(&mut players);
@@ -214,5 +302,9 @@ mod tests {
         assert!(trick.passed_player_ids.contains(&2));
         assert!(trick.passed_player_ids.contains(&3));
         assert_eq!(trick.current_player_id, 3);
+    }
+
+    #[test]
+    fn test_trick_step_game_over() {
     }
 }

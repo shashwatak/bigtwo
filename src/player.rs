@@ -10,6 +10,7 @@ pub struct Player {
     pub cards: Vec<Card>,
     pub submit_hand: fn(&Hand, &Vec<Card>) -> Hand,
     pub start_game: fn(&Vec<Card>) -> Hand,
+    pub start_trick: fn(&Vec<Card>) -> Hand,
 }
 
 impl Default for Player {
@@ -18,6 +19,7 @@ impl Default for Player {
             cards: vec![],
             submit_hand: PLAY_SMALLEST_SINGLE_OR_PASS,
             start_game: USE_THREE_OF_CLUBS,
+            start_trick: START_TRICK_WITH_SMALLEST_SINGLE,
         }
     }
 }
@@ -59,6 +61,9 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
     }
     Hand::Pass
 };
+
+pub const START_TRICK_WITH_SMALLEST_SINGLE: fn(&Vec<Card>) -> Hand =
+    |cards| Hand::Lone(cards[0]);
 
 impl Player {
     pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
