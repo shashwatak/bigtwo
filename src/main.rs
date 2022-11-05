@@ -9,7 +9,6 @@ use std::collections::BTreeSet;
 
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
-use crate::hand::Hand;
 use crate::player::Player;
 use crate::trick::Trick;
 
