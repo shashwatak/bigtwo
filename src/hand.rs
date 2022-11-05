@@ -64,6 +64,7 @@ impl Hand {
     }
 
     pub fn try_pair(first: Card, second: Card) -> Result<Hand, InvalidHandError> {
+        assert!(second < first);
         if first.number == second.number {
             Ok(Hand::Pair(first, second))
         } else {
@@ -72,6 +73,8 @@ impl Hand {
     }
 
     pub fn try_trips(first: Card, second: Card, third: Card) -> Result<Hand, InvalidHandError> {
+        assert!(third < second);
+        assert!(second < first);
         if first.number == second.number && second.number == third.number {
             Ok(Hand::Trips(first, second, third))
         } else {

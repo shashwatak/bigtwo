@@ -37,9 +37,9 @@ pub const USE_THREE_OF_CLUBS: fn(&Vec<Card>) -> Hand = |cards| {
 
     match cards[..] {
         [a, b, c, ..] => {
-            if let Ok(trips) = Hand::try_trips(a, b, c) {
+            if let Ok(trips) = Hand::try_trips(c, b, a) {
                 return trips;
-            } else if let Ok(pair) = Hand::try_pair(a, b) {
+            } else if let Ok(pair) = Hand::try_pair(b, a) {
                 return pair;
             } else {
                 return Hand::Lone(a);
@@ -125,6 +125,7 @@ mod tests {
         assert!(matches!(hand, Hand::Pass));
     }
 
+    #[test]
     fn test_use_three_of_clubs() {
         let cards = vec_card_from_str("3C 4C 5D 2S");
         let hand = USE_THREE_OF_CLUBS(&cards);

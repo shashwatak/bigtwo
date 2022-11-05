@@ -1,14 +1,12 @@
 mod check_player_can_play_hand;
+use check_player_can_play_hand::check_player_can_play_hand;
 
 use std::{
     collections::BTreeSet,
     fmt::{Display, Formatter},
-    iter::FromIterator,
 };
 
-use check_player_can_play_hand::check_player_can_play_hand;
 
-use crate::card::Card;
 use crate::hand::Hand;
 use crate::player::Player;
 
