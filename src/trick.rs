@@ -84,20 +84,11 @@ impl Trick {
 
         let player = &mut players[self.current_player_id];
 
-        let attempt = loop {
-            let attempt = (player.submit_hand)(&self.hand, &player.cards);
-
-            let is_attempt_allowed = check_player_can_play_hand(&self.hand, &player, &attempt);
-
-            match is_attempt_allowed {
-                Ok(()) => break attempt,
-                Err(e) => println!("{}: {}", attempt, e),
-            }
-        };
+        let submitted_hand = Trick::get_submitted_hand(player, &self.hand);
 
         let next_player_id = Trick::next_player_id(self.current_player_id, &self.passed_player_ids);
 
-        if let Hand::Pass = attempt {
+        if let Hand::Pass = submitted_hand {
             self.passed_player_ids.insert(self.current_player_id);
 
             if self.passed_player_ids.len() == (4 - 1) {
@@ -107,14 +98,27 @@ impl Trick {
                 TrickStepStatus::Passed
             }
         } else {
-            player.remove_hand_from_cards(&attempt);
-            self.hand = attempt;
+            player.remove_hand_from_cards(&submitted_hand);
+            self.hand = submitted_hand;
 
             if player.cards.len() == 0 {
                 TrickStepStatus::GameOver(self.current_player_id)
             } else {
                 self.current_player_id = next_player_id;
                 TrickStepStatus::Played
+            }
+        }
+    }
+
+    fn get_submitted_hand(player: &Player, hand_to_beat: &Hand) -> Hand {
+        loop {
+            let attempt = (player.submit_hand)(hand_to_beat, &player.cards);
+
+            let is_attempt_allowed = check_player_can_play_hand(hand_to_beat, &player, &attempt);
+
+            match is_attempt_allowed {
+                Ok(()) => break attempt,
+                Err(e) => println!("{}: {}", attempt, e),
             }
         }
     }
