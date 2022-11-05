@@ -18,12 +18,13 @@ pub struct Trick {
 }
 
 #[derive(Debug)]
-pub enum TrickStartStatus {
+pub enum StartStatus {
     GameOver(usize),
 }
 
+
 #[derive(Debug)]
-pub enum TrickStepStatus {
+pub enum StepStatus {
     Played,
     Passed,
     TrickOver(usize),
@@ -47,7 +48,7 @@ impl Trick {
         starting_player_id: usize,
         players: &mut [Player; 4],
         is_first: bool,
-    ) -> Result<Self, TrickStartStatus> {
+    ) -> Result<Self, StartStatus> {
         let player = &mut players[starting_player_id];
         let starting_hand: Hand;
         let trick: Trick;
@@ -68,7 +69,7 @@ impl Trick {
 
         player.remove_hand_from_cards(&starting_hand);
         if player.cards.len() == 0 {
-            Err(TrickStartStatus::GameOver(starting_player_id))
+            Err(StartStatus::GameOver(starting_player_id))
         } else {
             let next_player_id = Trick::next_player_id(starting_player_id, &BTreeSet::new());
             trick = Trick::new(starting_hand, next_player_id);
@@ -76,7 +77,7 @@ impl Trick {
         }
     }
 
-    pub fn step(&mut self, players: &mut [Player; 4]) -> TrickStepStatus {
+    pub fn step(&mut self, players: &mut [Player; 4]) -> StepStatus {
         assert!(
             self.passed_player_ids.len() < 4 - 1,
             "there must be at least 2 players playing"
@@ -92,20 +93,20 @@ impl Trick {
             self.passed_player_ids.insert(self.current_player_id);
 
             if self.passed_player_ids.len() == (4 - 1) {
-                TrickStepStatus::TrickOver(next_player_id)
+                StepStatus::TrickOver(next_player_id)
             } else {
                 self.current_player_id = next_player_id;
-                TrickStepStatus::Passed
+                StepStatus::Passed
             }
         } else {
             player.remove_hand_from_cards(&submitted_hand);
             self.hand = submitted_hand;
 
             if player.cards.len() == 0 {
-                TrickStepStatus::GameOver(self.current_player_id)
+                StepStatus::GameOver(self.current_player_id)
             } else {
                 self.current_player_id = next_player_id;
-                TrickStepStatus::Played
+                StepStatus::Played
             }
         }
     }
@@ -228,7 +229,7 @@ mod tests {
         players[3].cards = vec_card_from_str("7D");
         let starting_player_id: usize = 2;
         let trick_start = Trick::start(starting_player_id, &mut players, false);
-        assert!(matches!(trick_start, Err(TrickStartStatus::GameOver(p)) if p == starting_player_id));
+        assert!(matches!(trick_start, Err(StartStatus::GameOver(p)) if p == starting_player_id));
 
     }
 
@@ -246,7 +247,7 @@ mod tests {
 
         // P1 plays 7D, then P2
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, TrickStepStatus::Passed));
+        assert!(matches!(step_status, StepStatus::Passed));
         match trick.hand {
             Hand::Lone(a) => assert_eq!(a, "6D".parse().unwrap()),
             a => panic!("{}", a),
@@ -257,7 +258,7 @@ mod tests {
 
         // P2 must pass, then P3
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, TrickStepStatus::Passed));
+        assert!(matches!(step_status, StepStatus::Passed));
         match trick.hand {
             Hand::Lone(a) => assert_eq!(a, "6D".parse().unwrap()),
             a => panic!("{}", a),
@@ -269,7 +270,7 @@ mod tests {
 
         // P3 plays 7D, then to P0
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, TrickStepStatus::Played));
+        assert!(matches!(step_status, StepStatus::Played));
         match trick.hand {
             Hand::Lone(a) => assert_eq!(a, "7D".parse().unwrap()),
             a => panic!("{}", a),
@@ -281,7 +282,7 @@ mod tests {
 
         // P0 plays Ace of Spades, then to P3 (skipping P1 and P2 who passed)
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, TrickStepStatus::Played));
+        assert!(matches!(step_status, StepStatus::Played));
         match trick.hand {
             Hand::Lone(a) => assert_eq!(a, "AS".parse().unwrap()),
             a => panic!("{}", a),
@@ -294,7 +295,7 @@ mod tests {
         // P3 passes, Trick is Over and P0 won the Trick
         let step_status = trick.step(&mut players);
         match step_status {
-            TrickStepStatus::TrickOver(winner) => assert_eq!(winner, 0),
+            StepStatus::TrickOver(winner) => assert_eq!(winner, 0),
             a => panic!("{:?}", a),
         }
         match trick.hand {
