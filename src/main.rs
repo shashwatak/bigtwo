@@ -7,34 +7,35 @@ mod trick;
 
 use trick::GameContinueStatus;
 
-use crate::card::{Card, THREE_OF_CLUBS};
-use crate::hand::Hand;
+use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
-use crate::player::{Player, get_user_input, cards_to_string};
+use crate::player::{cards_to_string, get_user_input, Player};
 use crate::trick::Trick;
 
 fn main() {
     let mut players = <[Player; 4]>::default();
 
-    let user_submit_hand: fn(&Hand, &Vec<Card>) -> Hand = |hand,cards| {
-        println!("Your Turn: {}", cards_to_string(&cards)); 
+    players[0].submit_hand = |hand, cards| {
+        println!("Your Turn: {}", cards_to_string(&cards));
         println!("Must Beat: {}", hand);
         get_user_input(&mut std::io::stdin().lock())
     };
-    
-    let user_start_game_or_trick: fn(&Vec<Card>) -> Hand = |cards| {
-        println!("Your Turn: {}", cards_to_string(&cards)); 
+    players[0].start_game = |cards| {
+        println!(
+            "You must start the game using the 3C: {}",
+            cards_to_string(&cards)
+        );
         get_user_input(&mut std::io::stdin().lock())
     };
-    players[0].submit_hand = user_submit_hand;
-    players[0].start_game = user_start_game_or_trick;
-    players[0].start_trick = user_start_game_or_trick;
+    players[0].start_trick = |cards| {
+        println!("You may play any valid hand: {}", cards_to_string(&cards));
+        get_user_input(&mut std::io::stdin().lock())
+    };
 
     deal_cards(&mut players, Deck::new());
-    for (index, player) in players.iter().enumerate() {
-        println!("Player {}: {}", index, player);
-    }
+
     let mut starting_player_idx = find_player_with_three_of_clubs(&players);
+    println!("Player {starting_player_idx} has the Three of Clubs and may begin");
     let mut is_first_trick = true;
 
     let winner: usize = loop {
@@ -44,7 +45,8 @@ fn main() {
         match game_status {
             GameContinueStatus::GameOver(winner) => break winner,
             GameContinueStatus::NewTrick(new_starting_player_idx) => {
-                starting_player_idx = new_starting_player_idx
+                println!("Player {starting_player_idx} wins the trick (everybody else passed) and starts the next trick");
+                starting_player_idx = new_starting_player_idx;
             }
         }
     };
@@ -73,7 +75,6 @@ fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
 fn find_player_with_three_of_clubs(players: &[Player; 4]) -> usize {
     for (index, player) in players.iter().enumerate() {
         if player.cards.contains(&THREE_OF_CLUBS) {
-            println!("Player {index} has the Three of Clubs and may begin");
             return index;
         }
     }
