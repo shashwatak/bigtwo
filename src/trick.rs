@@ -68,6 +68,7 @@ impl Trick {
             starting_hand = (player.start_trick)(&player.cards);
         }
 
+        println!("Player {starting_player_id} begins with {starting_hand}");
         player.remove_hand_from_cards(&starting_hand);
 
         let next_player_id = next_player_id(starting_player_id, &BTreeSet::new());

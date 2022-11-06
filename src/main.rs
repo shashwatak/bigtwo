@@ -55,6 +55,7 @@ fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
 fn find_player_with_three_of_clubs(players: &[Player; 4]) -> usize {
     for (index, player) in players.iter().enumerate() {
         if player.cards.contains(&THREE_OF_CLUBS) {
+            println!("Player {index} has the Three of Clubs and may begin");
             return index;
         }
     }
