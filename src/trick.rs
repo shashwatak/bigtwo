@@ -28,8 +28,7 @@ pub enum StartStatus {
 
 #[derive(Debug)]
 pub enum StepStatus {
-    Played,
-    Passed,
+    Continue,
     TrickOver(usize),
     GameOver(usize),
 }
@@ -99,7 +98,7 @@ impl Trick {
                 StepStatus::TrickOver(next_player_id)
             } else {
                 self.current_player_id = next_player_id;
-                StepStatus::Passed
+                StepStatus::Continue
             }
         } else {
             player.remove_hand_from_cards(&submitted_hand);
@@ -109,7 +108,7 @@ impl Trick {
                 StepStatus::GameOver(self.current_player_id)
             } else {
                 self.current_player_id = next_player_id;
-                StepStatus::Played
+                StepStatus::Continue
             }
         }
     }
@@ -210,7 +209,7 @@ mod tests {
 
         // P1 plays 7D, then P2
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, StepStatus::Passed));
+        assert!(matches!(step_status, StepStatus::Continue));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
             a => panic!("{}", a),
@@ -221,7 +220,7 @@ mod tests {
 
         // P2 must pass, then P3
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, StepStatus::Passed));
+        assert!(matches!(step_status, StepStatus::Continue));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
             a => panic!("{}", a),
@@ -233,7 +232,7 @@ mod tests {
 
         // P3 plays 7D, then to P0
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, StepStatus::Played));
+        assert!(matches!(step_status, StepStatus::Continue));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"7D".parse().unwrap()),
             a => panic!("{}", a),
@@ -245,7 +244,7 @@ mod tests {
 
         // P0 plays Ace of Spades, then to P3 (skipping P1 and P2 who passed)
         let step_status = trick.step(&mut players);
-        assert!(matches!(step_status, StepStatus::Played));
+        assert!(matches!(step_status, StepStatus::Continue));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"AS".parse().unwrap()),
             a => panic!("{}", a),

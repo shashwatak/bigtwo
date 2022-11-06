@@ -7,7 +7,7 @@ mod trick;
 
 use std::collections::BTreeSet;
 
-use trick::StepStatus;
+use trick::{StepStatus, StartStatus};
 
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
@@ -23,14 +23,20 @@ fn main() {
     let mut starting_player_idx = find_player_with_three_of_clubs(&players);
     let mut is_first_trick = true;
     loop { 
-        let mut trick = Trick::start(starting_player_idx, &mut players, is_first_trick).unwrap();
+        let trick = Trick::start(starting_player_idx, &mut players, is_first_trick);
         is_first_trick = false;
+        if let Err(StartStatus::GameOver(p)) = trick {
+                println!("Game Over, Player {p} wins!!");
+                return;
+        }
+        let mut trick = trick.unwrap();
         loop {
             println!("{}", trick);
             println!("{}", players[trick.current_player_id]);
             let trick_step = trick.step(&mut players);
             if let StepStatus::TrickOver(p) = trick_step {
                 println!("Trick Over, Player {p} gets to start next trick");
+                starting_player_idx = p;
                 break;
             } else if let StepStatus::GameOver(p) = trick_step {
                 println!("Game Over, Player {p} wins!!");
