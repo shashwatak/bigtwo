@@ -80,8 +80,6 @@ impl Trick {
         }
 
         loop {
-            println!("------------------------------");
-            println!("{}", self);
             self.do_player_turn(players);
             let trick_status = self.is_trick_over(players);
             match trick_status {
@@ -163,9 +161,10 @@ impl Display for Trick {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Player: {} \nHand To Beat: {}",
-            self.current_player_id,
-            self.hand.last().unwrap()
+            // "Player: {} \nHand To Beat: {}",
+            // self.current_player_id,
+            // self.hand.last().unwrap()
+            ""
         )
     }
 }
