@@ -109,7 +109,7 @@ impl Trick {
         );
 
         let player = &mut players[self.current_player_id];
-        println!("Player {}'s cards: {}", self.current_player_id, player);
+        // println!("Player {}'s cards: {}", self.current_player_id, player);
         let submitted_hand = Trick::get_submitted_hand(player, &self.hand.last().unwrap());
 
         if let Hand::Pass = submitted_hand {
