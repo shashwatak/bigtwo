@@ -64,7 +64,7 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
 
 pub const START_TRICK_WITH_SMALLEST_SINGLE: fn(&Vec<Card>) -> Hand = |cards| Hand::Lone(cards[0]);
 
-pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
+pub fn get_user_input<Input: BufRead>(f: &mut Input, player_cards: &[Card]) -> Hand {
     loop {
         println!("Please enter the cards you would like to play, seperated by spaces");
         print!("> ");
@@ -85,12 +85,16 @@ pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
                 Ok(c) => cards.push(c),
             }
         }
+
         if card_errs.is_empty() {
             cards.sort();
             cards.reverse();
             let maybe_hand = Hand::try_from_cards(&cards);
             if let Ok(hand) = maybe_hand {
-                break hand;
+                if Player::hand_in_cards(&hand, &player_cards) {
+                    break hand;
+                }
+                println!("error: you do not have those cards");
             } else {
                 println!("error: invalid hand {:?}", maybe_hand.err());
             }
@@ -121,8 +125,11 @@ impl Player {
     }
 
     pub fn has_cards(&self, hand: &Hand) -> bool {
-        let cards: BTreeSet<&Card> = BTreeSet::from_iter(self.cards.iter());
+        Player::hand_in_cards(hand, &self.cards)
+    }
 
+    pub fn hand_in_cards(hand: &Hand, cards: &[Card]) -> bool {
+        let cards: BTreeSet<&Card> = BTreeSet::from_iter(cards);
         match hand {
             Hand::Lone(a) => cards.contains(a),
             Hand::Pair(a, b) => cards.contains(a) && cards.contains(b),

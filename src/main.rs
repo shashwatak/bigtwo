@@ -18,18 +18,18 @@ fn main() {
     players[0].submit_hand = |hand, cards| {
         println!("Your Turn: {}", cards_to_string(&cards));
         println!("Must Beat: {}", hand);
-        get_user_input(&mut std::io::stdin().lock())
+        get_user_input(&mut std::io::stdin().lock(), &cards)
     };
     players[0].start_game = |cards| {
         println!(
             "You must start the game using the 3C: {}",
             cards_to_string(&cards)
         );
-        get_user_input(&mut std::io::stdin().lock())
+        get_user_input(&mut std::io::stdin().lock(), &cards)
     };
     players[0].start_trick = |cards| {
         println!("You may play any valid hand: {}", cards_to_string(&cards));
-        get_user_input(&mut std::io::stdin().lock())
+        get_user_input(&mut std::io::stdin().lock(), &cards)
     };
 
     deal_cards(&mut players, Deck::new());
