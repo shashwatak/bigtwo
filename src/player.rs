@@ -24,7 +24,7 @@ impl Default for Player {
     }
 }
 
-fn cards_to_string(cards: &[Card]) -> String {
+pub fn cards_to_string(cards: &[Card]) -> String {
     cards.iter().map(|card| format!(" [{}] ", card)).collect()
 }
 

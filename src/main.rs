@@ -7,13 +7,29 @@ mod trick;
 
 use trick::GameContinueStatus;
 
-use crate::card::THREE_OF_CLUBS;
+use crate::card::{Card, THREE_OF_CLUBS};
+use crate::hand::Hand;
 use crate::deck::Deck;
-use crate::player::Player;
+use crate::player::{Player, get_user_input, cards_to_string};
 use crate::trick::Trick;
 
 fn main() {
     let mut players = <[Player; 4]>::default();
+
+    let user_submit_hand: fn(&Hand, &Vec<Card>) -> Hand = |hand,cards| {
+        println!("Your Turn: {}", cards_to_string(&cards)); 
+        println!("Must Beat: {}", hand);
+        get_user_input(&mut std::io::stdin().lock())
+    };
+    
+    let user_start_game_or_trick: fn(&Vec<Card>) -> Hand = |cards| {
+        println!("Your Turn: {}", cards_to_string(&cards)); 
+        get_user_input(&mut std::io::stdin().lock())
+    };
+    players[0].submit_hand = user_submit_hand;
+    players[0].start_game = user_start_game_or_trick;
+    players[0].start_trick = user_start_game_or_trick;
+
     deal_cards(&mut players, Deck::new());
     for (index, player) in players.iter().enumerate() {
         println!("Player {}: {}", index, player);
