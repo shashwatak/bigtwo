@@ -76,7 +76,7 @@ pub fn get_user_input<Input: BufRead>(f: &mut Input, player_cards: &[Card]) -> H
 
         let card_strs: Vec<&str> = line.split_whitespace().collect();
         for card_str in card_strs {
-            let maybe_card = card_str.parse::<Card>();
+            let maybe_card = card_str.to_uppercase().parse::<Card>();
             match maybe_card {
                 Err(e) => {
                     println!("error: could not understand {card_str}, {:?}", e);
