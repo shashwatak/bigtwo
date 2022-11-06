@@ -35,7 +35,11 @@ fn main() {
 }
 
 fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
-    // TODO: shuffle the deck :3
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    let mut rng = thread_rng();
+    deck.cards[..].shuffle(&mut rng); 
+    
     let mut player_index: usize = 0;
     while let Some(card) = deck.cards.pop() {
         let index = player_index % 4;
