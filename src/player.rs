@@ -1,5 +1,5 @@
-use std::collections::BTreeSet;
 use std::fmt::Display;
+use std::{collections::BTreeSet, io::BufRead};
 
 use crate::{
     card::{Card, THREE_OF_CLUBS},
@@ -63,6 +63,40 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
 };
 
 pub const START_TRICK_WITH_SMALLEST_SINGLE: fn(&Vec<Card>) -> Hand = |cards| Hand::Lone(cards[0]);
+
+pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
+    loop {
+        println!("Please enter the cards you would like to play, seperated by spaces");
+        print!("> ");
+        let mut line = String::new();
+        f.read_line(&mut line).unwrap();
+
+        let mut cards = vec![];
+        let mut card_errs = vec![];
+
+        let card_strs: Vec<&str> = line.split_whitespace().collect();
+        for card_str in card_strs {
+            let maybe_card = card_str.parse::<Card>();
+            match maybe_card {
+                Err(e) => {
+                    println!("error: could not understand {card_str}, {:?}", e);
+                    card_errs.push(e);
+                }
+                Ok(c) => cards.push(c),
+            }
+        }
+        if card_errs.is_empty() {
+            cards.sort();
+            cards.reverse();
+            let maybe_hand = Hand::try_from_cards(&cards);
+            if let Ok(hand) = maybe_hand {
+                break hand;
+            } else {
+                println!("error: invalid hand {:?}", maybe_hand.err());
+            }
+        }
+    }
+}
 
 impl Player {
     pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
@@ -175,5 +209,32 @@ mod tests {
         assert!(!player.cards.contains(&"3D".parse().unwrap()));
         assert!(player.cards.contains(&"5S".parse().unwrap()));
         assert!(player.cards.contains(&"6S".parse().unwrap()));
+    }
+
+    #[test]
+    fn test_get_user_input() {
+        let mut input = "3C".as_bytes();
+        let hand = get_user_input(&mut input);
+        assert!(matches!(hand, Hand::Lone(c) if c == THREE_OF_CLUBS));
+
+        const THREE_OF_DIAMONDS: Card = Card {
+            number: Number::Three,
+            suit: Suit::Diamonds,
+        };
+        const THREE_OF_SPADES: Card = Card {
+            number: Number::Three,
+            suit: Suit::Spades,
+        };
+
+        let mut input = "3C 3S 3D".as_bytes();
+        let hand = get_user_input(&mut input);
+        assert!(matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,));
+
+
+        let mut input = "3G\n3S 4D\n3C 3S 3D".as_bytes();
+        let hand = get_user_input(&mut input);
+        assert!(matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,));
+
+
     }
 }
