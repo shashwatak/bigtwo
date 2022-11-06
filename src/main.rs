@@ -5,6 +5,7 @@ mod player;
 mod test_util;
 mod trick;
 
+use trick::GameContinueStatus;
 
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
@@ -19,28 +20,18 @@ fn main() {
     }
     let mut starting_player_idx = find_player_with_three_of_clubs(&players);
     let mut is_first_trick = true;
-    // loop {
-    //     let trick = Trick::start(starting_player_idx, &mut players, is_first_trick);
-    //     is_first_trick = false;
-    //     if let Err(StartStatus::GameOver(p)) = trick {
-    //             println!("Game Over, Player {p} wins!!");
-    //             return;
-    //     }
-    //     let mut trick = trick.unwrap();
-    //     loop {
-    //         println!("{}", trick);
-    //         println!("{}", players[trick.current_player_id]);
-    //         let trick_step = trick.do_player_turn(&mut players);
-    //         if let TrickContinueStatus::TrickOver(p) = trick_step {
-    //             println!("Trick Over, Player {p} gets to start next trick");
-    //             starting_player_idx = p;
-    //             break;
-    //         } else if let TrickContinueStatus::GameOver(p) = trick_step {
-    //             println!("Game Over, Player {p} wins!!");
-    //             return;
-    //         }
-    //     }
-    // }
+
+    let winner: usize = loop {
+        let mut trick = Trick::start(starting_player_idx, &mut players, is_first_trick);
+        is_first_trick = false;
+        let game_status = trick.do_trick(&mut players);
+        match game_status {
+            GameContinueStatus::GameOver(winner) => break winner,
+            GameContinueStatus::NewTrick(last_player) => starting_player_idx = last_player,
+        }
+    };
+
+    println!("Game Over, Player {winner} wins!!");
 }
 
 fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {

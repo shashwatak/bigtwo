@@ -21,6 +21,12 @@ pub struct Trick {
 }
 
 #[derive(Debug)]
+pub enum GameContinueStatus {
+    NewTrick(usize),
+    GameOver(usize),
+}
+
+#[derive(Debug)]
 pub enum TrickContinueStatus {
     Continue,
     TrickOver(usize),
@@ -41,10 +47,12 @@ impl Trick {
     }
 
     pub fn start(starting_player_id: usize, players: &mut [Player; 4], is_first: bool) -> Self {
+
         let player = &mut players[starting_player_id];
+
         let starting_hand: Hand;
-        let trick: Trick;
         if is_first {
+
             starting_hand = loop {
                 assert_eq!(player.cards[0], THREE_OF_CLUBS);
                 let attempt = (player.start_game)(&player.cards);
@@ -55,6 +63,7 @@ impl Trick {
                     _ => println!("must play a hand that includes the Three of Clubs"),
                 }
             };
+
         } else {
             starting_hand = (player.start_trick)(&player.cards);
         }
@@ -64,6 +73,26 @@ impl Trick {
         let next_player_id = next_player_id(starting_player_id, &BTreeSet::new());
 
         Trick::new(starting_hand, next_player_id)
+    }
+
+    pub fn do_trick(&mut self, players: &mut [Player; 4]) -> GameContinueStatus {
+        // its possible the trick is started and the game is over instantly because
+        // the player that started the trick finished their cards
+        if let TrickContinueStatus::GameOver(winner) = self.is_trick_over(players) {
+            return GameContinueStatus::GameOver(winner);
+        }
+
+        loop {
+            println!("------------------------------");
+            println!("{}", self);
+            self.do_player_turn(players);
+            let trick_status = self.is_trick_over(players);
+            match trick_status {
+                TrickContinueStatus::Continue => continue,
+                TrickContinueStatus::TrickOver(last_player) => break GameContinueStatus::NewTrick(last_player),
+                TrickContinueStatus::GameOver(winner) => break GameContinueStatus::GameOver(winner),
+            }
+        }
     }
 
     pub fn do_player_turn(&mut self, players: &mut [Player; 4]) {
@@ -80,15 +109,17 @@ impl Trick {
         );
 
         let player = &mut players[self.current_player_id];
+        println!("Player {}'s cards: {}", self.current_player_id, player);
         let submitted_hand = Trick::get_submitted_hand(player, &self.hand.last().unwrap());
 
         if let Hand::Pass = submitted_hand {
+            println!("Player {} passed", self.current_player_id);
             self.passed_player_ids.insert(self.current_player_id);
         } else {
+            println!("Player {} played {}", self.current_player_id, submitted_hand);
             player.remove_hand_from_cards(&submitted_hand);
             self.hand.push(submitted_hand);
         }
-
         self.current_player_id = next_player_id(self.current_player_id, &self.passed_player_ids);
     }
 
