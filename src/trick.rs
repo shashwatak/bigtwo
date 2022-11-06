@@ -47,11 +47,9 @@ impl Trick {
     }
 
     pub fn start(starting_player_id: usize, players: &mut [Player; 4], is_first: bool) -> Self {
-
         let player = &mut players[starting_player_id];
 
         let starting_hand = if is_first {
-
             loop {
                 assert_eq!(player.cards[0], THREE_OF_CLUBS);
                 let attempt = (player.start_game)(&player.cards);
@@ -62,7 +60,6 @@ impl Trick {
                     _ => println!("must play a hand that includes the Three of Clubs"),
                 }
             }
-
         } else {
             (player.start_trick)(&player.cards)
         };
@@ -89,19 +86,22 @@ impl Trick {
             let trick_status = self.is_trick_over(players);
             match trick_status {
                 TrickContinueStatus::Continue => continue,
-                TrickContinueStatus::TrickOver(last_player) => break GameContinueStatus::NewTrick(last_player),
-                TrickContinueStatus::GameOver(winner) => break GameContinueStatus::GameOver(winner),
+                TrickContinueStatus::TrickOver(last_player) => {
+                    break GameContinueStatus::NewTrick(last_player)
+                }
+                TrickContinueStatus::GameOver(winner) => {
+                    break GameContinueStatus::GameOver(winner)
+                }
             }
         }
     }
 
     pub fn do_player_turn(&mut self, players: &mut [Player; 4]) {
-
         assert!(
             self.passed_player_ids.len() < 4 - 1,
             "there must be at least 2 players who have not yet passed"
         );
-        
+
         assert!(
             players.iter().all(|p| !p.cards.is_empty()),
             "all players must have some cards in order to step (game should have \
@@ -116,7 +116,10 @@ impl Trick {
             println!("Player {} passed", self.current_player_id);
             self.passed_player_ids.insert(self.current_player_id);
         } else {
-            println!("Player {} played {}", self.current_player_id, submitted_hand);
+            println!(
+                "Player {} played {}",
+                self.current_player_id, submitted_hand
+            );
             player.remove_hand_from_cards(&submitted_hand);
             self.hand.push(submitted_hand);
         }
@@ -327,7 +330,6 @@ mod tests {
         assert_eq!(trick.current_player_id, 0);
     }
 
-
     #[test]
     fn test_trick_start_step_game_over() {
         // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 6D, P1 is
@@ -401,7 +403,5 @@ mod tests {
         assert!(trick.passed_player_ids.contains(&1));
         assert!(trick.passed_player_ids.contains(&2));
         assert_eq!(trick.current_player_id, 3);
-
     }
-
 }

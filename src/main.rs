@@ -27,7 +27,9 @@ fn main() {
         let game_status = trick.do_trick(&mut players);
         match game_status {
             GameContinueStatus::GameOver(winner) => break winner,
-            GameContinueStatus::NewTrick(last_player) => starting_player_idx = last_player,
+            GameContinueStatus::NewTrick(new_starting_player_idx) => {
+                starting_player_idx = new_starting_player_idx
+            }
         }
     };
 
@@ -38,8 +40,8 @@ fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
     use rand::seq::SliceRandom;
     use rand::thread_rng;
     let mut rng = thread_rng();
-    deck.cards[..].shuffle(&mut rng); 
-    
+    deck.cards[..].shuffle(&mut rng);
+
     let mut player_index: usize = 0;
     while let Some(card) = deck.cards.pop() {
         let index = player_index % 4;
