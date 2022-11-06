@@ -3,10 +3,9 @@
 ## Game Loop
 
 ### Assumptions
-
-- 4 Players
-- Game Over when any Player plays their last card(s)
-- Remaining Player's points added up (lower is better)
+- 52 standard playing cards
+- 4 Players, start with 13 cards each
+- First player to have 0 cards wins
 
 ### Initialization
 
@@ -27,4 +26,17 @@
   - Passes, plays no cards and exits the Trick.
     - If this is the 3rd player to Exit the Trick, i.e. there is only one other player remaining in the Trick, then the Trick is over, last remaining player in Trick wins the Trick
 - Counter-Clockwise to next Player (who has not already passed).
+
+## Current Game Limitations (i.e. TODOs)
+- Only AIs playing, no User input
+  - Need to implement UserInput: get the cards the user wants to play
+- Only supports Lone, Pairs, and Trips
+  - Need to implement Fivers: Straight, Flush, FourPlusKick, StraightFlush
+  - Need to implement Bombs
+- NPC AI only plays Lone, will pass on Pairs and Trips
+  - Need to implement AI that can play on anything 
+
+## Current Code Organization Issues
+- main contains the logis to initialize the game and run Tricks
+  - Need to make a Game module and relocate this logic (shuffle deck, deal cards, find player with 3C)
 
