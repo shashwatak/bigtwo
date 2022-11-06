@@ -50,10 +50,9 @@ impl Trick {
 
         let player = &mut players[starting_player_id];
 
-        let starting_hand: Hand;
-        if is_first {
+        let starting_hand = if is_first {
 
-            starting_hand = loop {
+            loop {
                 assert_eq!(player.cards[0], THREE_OF_CLUBS);
                 let attempt = (player.start_game)(&player.cards);
                 match attempt {
@@ -62,11 +61,11 @@ impl Trick {
                     Hand::Lone(a) if a == THREE_OF_CLUBS => break attempt,
                     _ => println!("must play a hand that includes the Three of Clubs"),
                 }
-            };
+            }
 
         } else {
-            starting_hand = (player.start_trick)(&player.cards);
-        }
+            (player.start_trick)(&player.cards)
+        };
 
         println!("Player {starting_player_id} begins with {starting_hand}");
         player.remove_hand_from_cards(&starting_hand);
@@ -104,14 +103,14 @@ impl Trick {
         );
         
         assert!(
-            players.iter().all(|p| p.cards.len() > 0),
+            players.iter().all(|p| !p.cards.is_empty()),
             "all players must have some cards in order to step (game should have \
             ended when any player went to 0 cards)"
         );
 
         let player = &mut players[self.current_player_id];
         // println!("Player {}'s cards: {}", self.current_player_id, player);
-        let submitted_hand = Trick::get_submitted_hand(player, &self.hand.last().unwrap());
+        let submitted_hand = Trick::get_submitted_hand(player, self.hand.last().unwrap());
 
         if let Hand::Pass = submitted_hand {
             println!("Player {} passed", self.current_player_id);
@@ -126,7 +125,7 @@ impl Trick {
 
     fn is_trick_over(&self, players: &[Player; 4]) -> TrickContinueStatus {
         for (player_id, player) in players.iter().enumerate() {
-            if player.cards.len() == 0 {
+            if player.cards.is_empty() {
                 return TrickContinueStatus::GameOver(player_id);
             }
         }
@@ -147,7 +146,7 @@ impl Trick {
         loop {
             let attempt = (player.submit_hand)(hand_to_beat, &player.cards);
 
-            let is_attempt_allowed = check_player_can_play_hand(hand_to_beat, &player, &attempt);
+            let is_attempt_allowed = check_player_can_play_hand(hand_to_beat, player, &attempt);
 
             match is_attempt_allowed {
                 Ok(()) => break attempt,

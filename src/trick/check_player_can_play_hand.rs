@@ -5,17 +5,17 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum PlayHandError {
-    NotMatch,
-    NotHighEnough,
-    NotPlayerCards,
+    Match,
+    HighEnough,
+    PlayerCards,
 }
 
 impl Display for PlayHandError {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
-            Self::NotMatch => write!(f, "wrong number of cards"),
-            Self::NotHighEnough => write!(f, "highest is not high enough"),
-            Self::NotPlayerCards => write!(f, "these cards are not in the players hand"),
+            Self::Match => write!(f, "wrong number of cards"),
+            Self::HighEnough => write!(f, "highest is not high enough"),
+            Self::PlayerCards => write!(f, "these cards are not in the players hand"),
         }
     }
 }
@@ -26,15 +26,15 @@ pub fn check_player_can_play_hand(
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
     if !Hand::is_same_type(current, attempt) {
-        return Err(PlayHandError::NotMatch);
+        return Err(PlayHandError::Match);
     }
 
     if current > attempt {
-        return Err(PlayHandError::NotHighEnough);
+        return Err(PlayHandError::HighEnough);
     }
 
     if !player.has_cards(attempt) {
-        return Err(PlayHandError::NotPlayerCards);
+        return Err(PlayHandError::PlayerCards);
     }
 
     Ok(())
@@ -67,17 +67,17 @@ mod tests {
         // incorrectly plays a Three of Diamonds, reject
         let hand: Hand = "3D".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::NotHighEnough)));
+        assert!(matches!(res, Err(PlayHandError::HighEnough)));
 
         // incorrectly plays a Pair of Fours, reject
         let hand: Hand = "4H 4D".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::NotMatch)));
+        assert!(matches!(res, Err(PlayHandError::Match)));
 
         // incorrectly plays cards they don't have
         let hand: Hand = "2S".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::NotPlayerCards)));
+        assert!(matches!(res, Err(PlayHandError::PlayerCards)));
 
         // passes
         let hand: Hand = "".parse().unwrap();

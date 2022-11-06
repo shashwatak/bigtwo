@@ -10,7 +10,7 @@ use trick::GameContinueStatus;
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
 use crate::player::Player;
-use crate::trick::{Trick, TrickContinueStatus};
+use crate::trick::Trick;
 
 fn main() {
     let mut players = <[Player; 4]>::default();

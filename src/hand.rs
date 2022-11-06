@@ -85,7 +85,7 @@ impl Hand {
     pub fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
         let mut unique_cards: BTreeSet<&Card> = BTreeSet::new();
         for card in cards {
-            unique_cards.insert(&card);
+            unique_cards.insert(card);
         }
         if unique_cards.len() < cards.len() {
             return Err(ParseHandError::DuplicateCard);
@@ -109,7 +109,7 @@ impl FromStr for Hand {
 
     fn from_str(hand_str: &str) -> Result<Hand, Self::Err> {
         let hand_str = hand_str.trim();
-        if hand_str.len() == 0 {
+        if hand_str.is_empty() {
             return Ok(Hand::Pass);
         }
         let maybe_cards = hand_str.split(' ').collect::<Vec<&str>>();
@@ -126,13 +126,13 @@ impl FromStr for Hand {
 
 impl Hand {
     pub fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
-        match (previous, attempted) {
-            (_, Hand::Pass) => true,
-            (Hand::Lone(_), Hand::Lone(_)) => true,
-            (Hand::Pair(_, _), Hand::Pair(_, _)) => true,
-            (Hand::Trips(_, _, _), Hand::Trips(_, _, _)) => true,
-            _ => false,
-        }
+        matches!(
+            (previous, attempted),
+            (_, Hand::Pass)
+                | (Hand::Lone(_), Hand::Lone(_))
+                | (Hand::Pair(_, _), Hand::Pair(_, _))
+                | (Hand::Trips(_, _, _), Hand::Trips(_, _, _))
+        )
     }
 }
 

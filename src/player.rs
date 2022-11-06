@@ -24,8 +24,8 @@ impl Default for Player {
     }
 }
 
-fn cards_to_string(cards: &Vec<Card>) -> String {
-    cards.iter().map(|card| format!(" [{}] ", card.to_string())).collect()
+fn cards_to_string(cards: &[Card]) -> String {
+    cards.iter().map(|card| format!(" [{}] ", card)).collect()
 }
 
 impl Display for Player {
@@ -40,11 +40,11 @@ pub const USE_THREE_OF_CLUBS: fn(&Vec<Card>) -> Hand = |cards| {
     match cards[..] {
         [a, b, c, ..] => {
             if let Ok(trips) = Hand::try_trips(c, b, a) {
-                return trips;
+                trips
             } else if let Ok(pair) = Hand::try_pair(b, a) {
-                return pair;
+                pair
             } else {
-                return Hand::Lone(a);
+                Hand::Lone(a)
             }
         }
         _ => panic!("oop"),
