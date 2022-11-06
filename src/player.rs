@@ -228,13 +228,14 @@ mod tests {
 
         let mut input = "3C 3S 3D".as_bytes();
         let hand = get_user_input(&mut input);
-        assert!(matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,));
-
+        assert!(
+            matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,)
+        );
 
         let mut input = "3G\n3S 4D\n3C 3S 3D".as_bytes();
         let hand = get_user_input(&mut input);
-        assert!(matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,));
-
-
+        assert!(
+            matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,)
+        );
     }
 }
