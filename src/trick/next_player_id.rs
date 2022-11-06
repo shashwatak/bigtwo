@@ -3,8 +3,8 @@ use std::collections::BTreeSet;
 pub fn next_player_id(current_player_id: usize, passed_player_ids: &BTreeSet<usize>) -> usize {
     assert!(current_player_id < 4);
     assert!(
-        passed_player_ids.len() < 4 - 1,
-        "there must be at least 2 players playing"
+        passed_player_ids.len() < 4,
+        "all players cannot pass, one player must have not passed"
     );
     for i in 1..4 {
         let next_id = (current_player_id + i) % 4;
