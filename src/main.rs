@@ -5,8 +5,6 @@ mod player;
 mod test_util;
 mod trick;
 
-use std::collections::BTreeSet;
-
 use trick::{StepStatus, StartStatus};
 
 use crate::card::THREE_OF_CLUBS;
