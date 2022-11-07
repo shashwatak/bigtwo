@@ -1,3 +1,5 @@
+//! Represents a Standard-52 Playing Card.
+
 pub mod rank;
 pub mod suit;
 
@@ -16,6 +18,7 @@ pub const THREE_OF_CLUBS: Card = Card {
 };
 
 /// Represents a Standard-52 Playing Card.
+/// Composed of a Rank and a Suit, with Rank taking precedence over Suit.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
     pub rank: Rank,

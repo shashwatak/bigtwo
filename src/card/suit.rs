@@ -1,7 +1,9 @@
+//! Represents the suit on a Standard-52 card, ordered. 
 use core::fmt;
 use std::str::FromStr;
 
 /// Represents the suit on a Standard-52 card, ordered.
+/// In Big Two, the convention is to order the Suits alphabetically.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Suit {
     Clubs,
