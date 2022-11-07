@@ -20,19 +20,22 @@ fn main() {
     let mut players = <[Player; 4]>::default();
 
     players[0].submit_hand = |_, cards| {
-        println!("=== Your Turn: {}", cards_to_string(&cards));
-        get_user_input(&mut std::io::stdin().lock(), &cards)
+        println!("=== Your Turn: {}", cards_to_string(cards));
+        get_user_input(&mut std::io::stdin().lock())
     };
     players[0].start_game = |cards| {
         println!(
             "=== Please start the game using the |3C|: {}",
-            cards_to_string(&cards)
+            cards_to_string(cards)
         );
-        get_user_input(&mut std::io::stdin().lock(), &cards)
+        get_user_input(&mut std::io::stdin().lock())
     };
     players[0].start_trick = |cards| {
-        println!("=== You may play any valid hand: {}", cards_to_string(&cards));
-        get_user_input(&mut std::io::stdin().lock(), &cards)
+        println!(
+            "=== You may play any valid hand: {}",
+            cards_to_string(cards)
+        );
+        get_user_input(&mut std::io::stdin().lock())
     };
 
     deal_cards(&mut players, Deck::new());

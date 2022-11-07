@@ -65,11 +65,11 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
 
 pub const START_TRICK_WITH_SMALLEST_SINGLE: fn(&Vec<Card>) -> Hand = |cards| Hand::Lone(cards[0]);
 
-pub fn get_user_input<Input: BufRead>(f: &mut Input, player_cards: &[Card]) -> Hand {
+pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
     loop {
         let mut line = String::new();
         print!("> ");
-        
+
         io::stdout().flush().unwrap();
         f.read_line(&mut line).unwrap();
 
@@ -93,10 +93,7 @@ pub fn get_user_input<Input: BufRead>(f: &mut Input, player_cards: &[Card]) -> H
             cards.reverse();
             let maybe_hand = Hand::try_from_cards(&cards);
             if let Ok(hand) = maybe_hand {
-                if Player::hand_in_cards(&hand, &player_cards) {
-                    break hand;
-                }
-                println!("error: you do not have those cards");
+                break hand;
             } else {
                 println!("error: invalid hand {:?}", maybe_hand.err());
             }
