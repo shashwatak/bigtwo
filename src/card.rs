@@ -1,28 +1,28 @@
-pub mod number;
+pub mod rank;
 pub mod suit;
 
-use number::Number;
+use rank::Rank;
 use suit::Suit;
 
 use core::fmt;
 use std::str::FromStr;
 
-use self::{number::ParseNumberError, suit::ParseSuitError};
+use self::{rank::ParseRankError, suit::ParseSuitError};
 
 pub const THREE_OF_CLUBS: Card = Card {
-    number: Number::Three,
+    rank: Rank::Three,
     suit: Suit::Clubs,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
-    pub number: Number,
+    pub rank: Rank,
     pub suit: Suit,
 }
 
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}", self.number, self.suit)
+        write!(f, "{}{}", self.rank, self.suit)
     }
 }
 
@@ -30,13 +30,13 @@ impl fmt::Display for Card {
 pub enum ParseCardError {
     Empty,
     BadLen,
-    BadNumber(ParseNumberError),
+    BadRank(ParseRankError),
     BadSuit(ParseSuitError),
 }
 
-impl From<ParseNumberError> for ParseCardError {
-    fn from(error: ParseNumberError) -> Self {
-        ParseCardError::BadNumber(error)
+impl From<ParseRankError> for ParseCardError {
+    fn from(error: ParseRankError) -> Self {
+        ParseCardError::BadRank(error)
     }
 }
 
@@ -52,10 +52,10 @@ impl FromStr for Card {
         match &cell_str.chars().collect::<Vec<char>>()[..] {
             [] => Err(Self::Err::Empty),
             chars if chars.len() != 2 => Err(Self::Err::BadLen),
-            [number_char, suit_char] => {
-                let number = number_char.to_string().parse::<Number>()?;
+            [rank_char, suit_char] => {
+                let rank = rank_char.to_string().parse::<Rank>()?;
                 let suit = suit_char.to_string().parse::<Suit>()?;
-                Ok(Card { number, suit })
+                Ok(Card { rank, suit })
             }
             _ => unreachable!(),
         }
@@ -79,7 +79,7 @@ mod tests {
         }
         {
             let cell = "SD".to_string().parse::<Card>();
-            assert!(matches!(cell, Err(ParseCardError::BadNumber(_))));
+            assert!(matches!(cell, Err(ParseCardError::BadRank(_))));
         }
         {
             let cell = "3K".to_string().parse::<Card>();

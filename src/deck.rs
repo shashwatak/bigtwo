@@ -1,4 +1,4 @@
-use crate::card::number::Number;
+use crate::card::rank::Rank;
 use crate::card::suit::Suit;
 use crate::card::Card;
 
@@ -14,12 +14,12 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Deck {
         let mut cards: Vec<Card> = Vec::new();
-        let numbers = &Number::all();
+        let ranks = &Rank::all();
         let suits = &Suit::all();
-        for number in numbers {
+        for rank in ranks {
             for suit in suits {
                 cards.push(Card {
-                    number: *number,
+                    rank: *rank,
                     suit: *suit,
                 });
             }

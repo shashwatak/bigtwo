@@ -142,7 +142,7 @@ impl Player {
 mod tests {
 
     use super::*;
-    use crate::card::{number::Number, suit::Suit};
+    use crate::card::{rank::Rank, suit::Suit};
     use crate::test_util::tests::vec_card_from_str;
 
     #[test]
@@ -153,7 +153,7 @@ mod tests {
         assert!(matches!(
             hand,
             Hand::Lone(Card {
-                number: Number::Four,
+                rank: Rank::Four,
                 suit: Suit::Spades
             })
         ));
@@ -224,11 +224,11 @@ mod tests {
         assert!(matches!(hand, Hand::Lone(c) if c == THREE_OF_CLUBS));
 
         const THREE_OF_DIAMONDS: Card = Card {
-            number: Number::Three,
+            rank: Rank::Three,
             suit: Suit::Diamonds,
         };
         const THREE_OF_SPADES: Card = Card {
-            number: Number::Three,
+            rank: Rank::Three,
             suit: Suit::Spades,
         };
 
