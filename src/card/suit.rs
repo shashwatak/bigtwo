@@ -1,6 +1,7 @@
 use core::fmt;
 use std::str::FromStr;
 
+/// Represents the suit on a Standard-52 card, ordered.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Suit {
     Clubs,
@@ -9,9 +10,13 @@ pub enum Suit {
     Spades,
 }
 
+/// A convenience for iterating through Suit's variants, without Index or Iterator trait.
+/// TODO: replace with Index trait and/or Iterator trait
 const SUITS: [Suit; 4] = [Suit::Clubs, Suit::Diamonds, Suit::Hearts, Suit::Spades];
 
 impl Suit {
+    /// A convenience for iterating through Suit's variants, without Index or Iterator trait.
+    /// TODO: replace with Index trait and/or Iterator trait
     pub fn all() -> [Suit; 4] {
         SUITS
     }
@@ -28,10 +33,15 @@ impl fmt::Display for Suit {
     }
 }
 
+
+/// Represents the possible errors from attempting to parse a Suit from a string.
 #[derive(Debug)]
 pub enum ParseSuitError {
+    /// Empty string.
     Empty,
-    BadLen,
+    /// Wrong number of chars.
+    BadLength,
+    /// parsed a character that is not part of any Suit
     BadChar(char),
 }
 
@@ -40,7 +50,7 @@ impl FromStr for Suit {
     fn from_str(suit_str: &str) -> Result<Self, Self::Err> {
         match suit_str {
             "" => Err(Self::Err::Empty),
-            c if c.len() >= 2 => Err(Self::Err::BadLen),
+            c if c.len() >= 2 => Err(Self::Err::BadLength),
             "C" => Ok(Suit::Clubs),
             "D" => Ok(Suit::Diamonds),
             "H" => Ok(Suit::Hearts),
