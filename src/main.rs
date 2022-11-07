@@ -9,7 +9,7 @@ use trick::GameContinueStatus;
 
 use crate::card::THREE_OF_CLUBS;
 use crate::deck::Deck;
-use crate::player::{cards_to_string, get_user_input, Player};
+use crate::player::Player;
 use crate::trick::Trick;
 
 fn main() {
@@ -18,25 +18,7 @@ fn main() {
     println!("Submit hands by typing the cards in e.g. \"3C 3D 3S\"");
     println!("-------------------");
     let mut players = <[Player; 4]>::default();
-
-    players[0].submit_hand = |_, cards| {
-        println!("=== Your Turn: {}", cards_to_string(cards));
-        get_user_input(&mut std::io::stdin().lock())
-    };
-    players[0].start_game = |cards| {
-        println!(
-            "=== Please start the game using the |3C|: {}",
-            cards_to_string(cards)
-        );
-        get_user_input(&mut std::io::stdin().lock())
-    };
-    players[0].start_trick = |cards| {
-        println!(
-            "=== You may play any valid hand: {}",
-            cards_to_string(cards)
-        );
-        get_user_input(&mut std::io::stdin().lock())
-    };
+    players[0].convert_to_user();
 
     deal_cards(&mut players, Deck::new());
 
