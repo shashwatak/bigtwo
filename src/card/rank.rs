@@ -113,11 +113,11 @@ mod tests {
             assert!(matches!(rank, Err(ParseRankError::Empty)));
         }
         {
-            let rank = "34".to_string().parse::<Rank>();
+            let rank = "34".parse::<Rank>();
             assert!(matches!(rank, Err(ParseRankError::BadLen)));
         }
         {
-            let rank = "R".to_string().parse::<Rank>();
+            let rank = "R".parse::<Rank>();
             assert!(matches!(rank, Err(ParseRankError::BadChar(_))));
         }
     }
@@ -126,7 +126,7 @@ mod tests {
     fn test_good_rank_to_from_string() {
         let good_ranks = ["3", "7", "J", "A", "2"];
         for expected_rank in good_ranks {
-            let rank = expected_rank.to_string().parse::<Rank>();
+            let rank = expected_rank.parse::<Rank>();
             assert!(matches!(rank, Ok(_)));
             let result_rank = rank.unwrap().to_string();
             assert_eq!(expected_rank, result_rank);

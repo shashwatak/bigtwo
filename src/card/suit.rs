@@ -58,15 +58,15 @@ mod tests {
     #[test]
     fn test_bad_suit_to_from_string() {
         {
-            let suit = "".to_string().parse::<Suit>();
+            let suit = "".parse::<Suit>();
             assert!(matches!(suit, Err(ParseSuitError::Empty)));
         }
         {
-            let suit = "DD".to_string().parse::<Suit>();
-            assert!(matches!(suit, Err(ParseSuitError::BadLen)));
+            let suit = "DD".parse::<Suit>();
+            assert!(matches!(suit, Err(ParseSuitError::BadLength)));
         }
         {
-            let suit = "T".to_string().parse::<Suit>();
+            let suit = "T".parse::<Suit>();
             assert!(matches!(suit, Err(ParseSuitError::BadChar(_))));
         }
     }
@@ -75,7 +75,7 @@ mod tests {
     fn test_good_suit_to_from_string() {
         let good_suits = ["C", "D", "H", "S"];
         for expected_suit in good_suits {
-            let suit = expected_suit.to_string().parse::<Suit>();
+            let suit = expected_suit.parse::<Suit>();
             assert!(matches!(suit, Ok(_)));
             let result_suit = suit.unwrap().to_string();
             assert_eq!(expected_suit, result_suit);
