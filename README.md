@@ -28,8 +28,6 @@
 - Counter-Clockwise to next Player (who has not already passed).
 
 ## Current Game Limitations (i.e. TODOs)
-- Only AIs playing, no User input
-  - Need to implement UserInput: get the cards the user wants to play
 - Only supports Lone, Pairs, and Trips
   - Need to implement Fivers: Straight, Flush, FourPlusKick, StraightFlush
   - Need to implement Bombs
