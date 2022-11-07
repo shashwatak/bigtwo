@@ -1,6 +1,7 @@
 use core::fmt;
 use std::str::FromStr;
 
+/// Represents the "number" on a Standard-52 card, ordered.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Rank {
     Three,
@@ -18,6 +19,8 @@ pub enum Rank {
     Two,
 }
 
+/// A convenience for iterating through the enums without std::ops::Index trait.
+/// TODO: replace with Index trait and/or Iterator trait
 const RANKS: [Rank; 13] = [
     Rank::Three,
     Rank::Four,
@@ -35,6 +38,9 @@ const RANKS: [Rank; 13] = [
 ];
 
 impl Rank {
+
+    /// A convenience for iterating through Rank's variants, without Index or Iterator trait.
+    /// TODO: replace with Index trait and/or Iterator trait
     pub fn all() -> [Rank; 13] {
         RANKS
     }
@@ -60,10 +66,14 @@ impl fmt::Display for Rank {
     }
 }
 
+/// Represents the possible errors from attempting to parse a Rank from a string.
 #[derive(Debug)]
 pub enum ParseRankError {
+    /// Empty string.
     Empty,
+    /// Wrong number of chars.
     BadLen,
+    /// parsed a character that is not part of any Rank
     BadChar(char),
 }
 
