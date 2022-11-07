@@ -1,3 +1,5 @@
+//! Represents a player in the game, could be AI or User.
+
 mod get_user_input;
 
 use std::collections::BTreeSet;
@@ -10,6 +12,10 @@ use crate::{
     hand::Hand,
 };
 
+/// Represents a player in the game, could be AI or User.
+/// We use settable Function-Pointers / Closures to change from AI to User.
+/// NOTE: Using settable Function-Pointers instead of Traits/Generics because
+/// it's just a bit easier for me right now.
 pub struct Player {
     pub cards: Vec<Card>,
     pub submit_hand: fn(&Hand, &Vec<Card>) -> Hand,
@@ -18,6 +24,7 @@ pub struct Player {
 }
 
 impl Default for Player {
+    /// Returns an AI Player with the defult movesets.
     fn default() -> Self {
         Self {
             cards: vec![],
@@ -28,28 +35,28 @@ impl Default for Player {
     }
 }
 
-pub fn cards_to_string(cards: &[Card]) -> String {
+/// useful for printing
+fn cards_to_string(cards: &[Card]) -> String {
     cards.iter().map(|card| format!(" |{}| ", card)).collect()
 }
 
 impl Player {
-    pub fn convert_to_user(&mut self) {
+    /// Use this to transform any player from default AI into a User that
+    /// accepts inputs from stdin.
+    pub fn convert_to_stdio_user(&mut self) {
         self.submit_hand = |_, cards| {
-            println!("=== Your Turn: {}", cards_to_string(cards));
+            println!("=== Your Turn.");
+            println!("-> {{ {} }}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
         self.start_game = |cards| {
-            println!(
-                "=== Please start the game using the |3C|: {}",
-                cards_to_string(cards)
-            );
+            println!("=== Please start the game using the |3C| .");
+            println!("-> {{ {} }}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
         self.start_trick = |cards| {
-            println!(
-                "=== You may play any valid hand: {}",
-                cards_to_string(cards)
-            );
+            println!("=== You may play any valid hand.");
+            println!("-> {{ {} }}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
     }

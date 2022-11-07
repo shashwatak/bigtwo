@@ -18,7 +18,7 @@ fn main() {
     println!("Submit hands by typing the cards in e.g. \"3C 3D 3S\"");
     println!("-------------------");
     let mut players = <[Player; 4]>::default();
-    players[0].convert_to_user();
+    players[0].convert_to_stdio_user();
 
     deal_cards(&mut players, Deck::new());
 
