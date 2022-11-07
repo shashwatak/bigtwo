@@ -72,7 +72,7 @@ pub enum ParseRankError {
     /// Empty string.
     Empty,
     /// Wrong number of chars.
-    BadLen,
+    BadLength,
     /// parsed a character that is not part of any Rank
     BadChar(char),
 }
@@ -82,7 +82,7 @@ impl FromStr for Rank {
     fn from_str(rank_str: &str) -> Result<Self, Self::Err> {
         match rank_str {
             "" => Err(Self::Err::Empty),
-            c if c.len() >= 2 => Err(Self::Err::BadLen),
+            c if c.len() >= 2 => Err(Self::Err::BadLength),
             "3" => Ok(Rank::Three),
             "4" => Ok(Rank::Four),
             "5" => Ok(Rank::Five),
@@ -114,7 +114,7 @@ mod tests {
         }
         {
             let rank = "34".parse::<Rank>();
-            assert!(matches!(rank, Err(ParseRankError::BadLen)));
+            assert!(matches!(rank, Err(ParseRankError::BadLength)));
         }
         {
             let rank = "R".parse::<Rank>();

@@ -9,11 +9,13 @@ use std::str::FromStr;
 
 use self::{rank::ParseRankError, suit::ParseSuitError};
 
+/// The Card that starts every game, we use this constant to conveniently identify it.
 pub const THREE_OF_CLUBS: Card = Card {
     rank: Rank::Three,
     suit: Suit::Clubs,
 };
 
+/// Represents a Standard-52 Playing Card.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Card {
     pub rank: Rank,
@@ -26,11 +28,17 @@ impl fmt::Display for Card {
     }
 }
 
+
+/// Represents the possible errors from attempting to parse a Card from a string.
 #[derive(Debug)]
 pub enum ParseCardError {
+    /// Empty string.
     Empty,
-    BadLen,
+    /// Wrong number of chars.
+    BadLength,
+    /// Error while parsing the Rank
     BadRank(ParseRankError),
+    /// Error while parsing the Suit 
     BadSuit(ParseSuitError),
 }
 
@@ -51,7 +59,7 @@ impl FromStr for Card {
     fn from_str(cell_str: &str) -> Result<Self, Self::Err> {
         match &cell_str.chars().collect::<Vec<char>>()[..] {
             [] => Err(Self::Err::Empty),
-            chars if chars.len() != 2 => Err(Self::Err::BadLen),
+            chars if chars.len() != 2 => Err(Self::Err::BadLength),
             [rank_char, suit_char] => {
                 let rank = rank_char.to_string().parse::<Rank>()?;
                 let suit = suit_char.to_string().parse::<Suit>()?;
@@ -70,19 +78,19 @@ mod tests {
     #[test]
     fn test_bad_card_to_from_string() {
         {
-            let card = "".to_string().parse::<Card>();
+            let card = "".parse::<Card>();
             assert!(matches!(card, Err(ParseCardError::Empty)));
         }
         {
-            let cell = "3CC".to_string().parse::<Card>();
-            assert!(matches!(cell, Err(ParseCardError::BadLen)));
+            let cell = "3CC".parse::<Card>();
+            assert!(matches!(cell, Err(ParseCardError::BadLength)));
         }
         {
-            let cell = "SD".to_string().parse::<Card>();
+            let cell = "SD".parse::<Card>();
             assert!(matches!(cell, Err(ParseCardError::BadRank(_))));
         }
         {
-            let cell = "3K".to_string().parse::<Card>();
+            let cell = "3K".parse::<Card>();
             assert!(matches!(cell, Err(ParseCardError::BadSuit(_))));
         }
     }
@@ -91,7 +99,7 @@ mod tests {
     fn test_good_card_to_from_string() {
         let good_cells = ["2S", "3C", "KD", "AH", "TS", "QC", "JD"];
         for expected_cell in good_cells {
-            let cell = expected_cell.to_string().parse::<Card>();
+            let cell = expected_cell.parse::<Card>();
             assert!(matches!(cell, Ok(_)));
             let result_cell = cell.unwrap().to_string();
             assert_eq!(expected_cell, result_cell);
