@@ -25,7 +25,6 @@ pub fn check_player_can_play_hand(
     player: &Player,
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
-
     if !Hand::is_same_type(current, attempt) {
         return Err(PlayHandError::Match);
     }
@@ -39,7 +38,6 @@ pub fn check_player_can_play_hand(
     }
 
     Ok(())
-
 }
 
 #[cfg(test)]

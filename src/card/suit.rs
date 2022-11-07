@@ -1,4 +1,4 @@
-//! Represents the suit on a Standard-52 card, ordered. 
+//! Represents the suit on a Standard-52 card, ordered.
 use core::fmt;
 use std::str::FromStr;
 
@@ -34,7 +34,6 @@ impl fmt::Display for Suit {
         }
     }
 }
-
 
 /// Represents the possible errors from attempting to parse a Suit from a string.
 #[derive(Debug)]

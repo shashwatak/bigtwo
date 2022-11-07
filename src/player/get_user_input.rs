@@ -1,9 +1,8 @@
-
-use std::io::{self, Write};
 use std::io::BufRead;
+use std::io::{self, Write};
 
-use crate::hand::Hand;
 use crate::card::Card;
+use crate::hand::Hand;
 
 pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
     loop {
@@ -41,14 +40,12 @@ pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
 
     use super::*;
-    use crate::card::{rank::Rank, suit::Suit};
     use crate::card::THREE_OF_CLUBS;
+    use crate::card::{rank::Rank, suit::Suit};
 
     #[test]
     fn test_get_user_input() {

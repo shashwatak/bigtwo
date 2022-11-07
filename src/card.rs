@@ -31,7 +31,6 @@ impl fmt::Display for Card {
     }
 }
 
-
 /// Represents the possible errors from attempting to parse a Card from a string.
 #[derive(Debug)]
 pub enum ParseCardError {
@@ -41,7 +40,7 @@ pub enum ParseCardError {
     BadLength,
     /// Error while parsing the Rank
     BadRank(ParseRankError),
-    /// Error while parsing the Suit 
+    /// Error while parsing the Suit
     BadSuit(ParseSuitError),
 }
 

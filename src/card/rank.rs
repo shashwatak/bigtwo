@@ -1,6 +1,5 @@
 //! Represents the "number" on a Standard-52 card, ordered.
 
-
 use core::fmt;
 use std::str::FromStr;
 
@@ -43,7 +42,6 @@ const RANKS: [Rank; 13] = [
 ];
 
 impl Rank {
-
     /// A convenience for iterating through Rank's variants, without Index or Iterator trait.
     /// TODO: replace with Index trait and/or Iterator trait
     pub fn all() -> [Rank; 13] {

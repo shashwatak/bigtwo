@@ -4,7 +4,6 @@ use crate::card::rank::Rank;
 use crate::card::suit::Suit;
 use crate::card::Card;
 
-
 /// Represents a full 52 Card Deck of Standard Playing Cards
 #[derive(Debug)]
 pub struct Deck {

@@ -1,7 +1,7 @@
 mod get_user_input;
 
-use std::fmt::Display;
 use std::collections::BTreeSet;
+use std::fmt::Display;
 
 use get_user_input::get_user_input;
 
@@ -33,25 +33,25 @@ pub fn cards_to_string(cards: &[Card]) -> String {
 }
 
 impl Player {
-    pub fn convert_to_user(&mut self){
-    self.submit_hand = |_, cards| {
-        println!("=== Your Turn: {}", cards_to_string(cards));
-        get_user_input(&mut std::io::stdin().lock())
-    };
-    self.start_game = |cards| {
-        println!(
-            "=== Please start the game using the |3C|: {}",
-            cards_to_string(cards)
-        );
-        get_user_input(&mut std::io::stdin().lock())
-    };
-    self.start_trick = |cards| {
-        println!(
-            "=== You may play any valid hand: {}",
-            cards_to_string(cards)
-        );
-        get_user_input(&mut std::io::stdin().lock())
-    };
+    pub fn convert_to_user(&mut self) {
+        self.submit_hand = |_, cards| {
+            println!("=== Your Turn: {}", cards_to_string(cards));
+            get_user_input(&mut std::io::stdin().lock())
+        };
+        self.start_game = |cards| {
+            println!(
+                "=== Please start the game using the |3C|: {}",
+                cards_to_string(cards)
+            );
+            get_user_input(&mut std::io::stdin().lock())
+        };
+        self.start_trick = |cards| {
+            println!(
+                "=== You may play any valid hand: {}",
+                cards_to_string(cards)
+            );
+            get_user_input(&mut std::io::stdin().lock())
+        };
     }
 }
 
@@ -90,7 +90,6 @@ pub const PLAY_SMALLEST_SINGLE_OR_PASS: fn(&Hand, &Vec<Card>) -> Hand = |hand, c
 };
 
 pub const START_TRICK_WITH_SMALLEST_SINGLE: fn(&Vec<Card>) -> Hand = |cards| Hand::Lone(cards[0]);
-
 
 impl Player {
     pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
