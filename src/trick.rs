@@ -4,10 +4,7 @@ use check_player_can_play_hand::check_player_can_play_hand;
 mod next_player_id;
 use next_player_id::next_player_id;
 
-use std::{
-    collections::BTreeSet,
-    fmt::{Display, Formatter},
-};
+use std::collections::BTreeSet;
 
 use crate::card::THREE_OF_CLUBS;
 use crate::hand::Hand;
@@ -15,9 +12,9 @@ use crate::player::Player;
 
 #[derive(Debug)]
 pub struct Trick {
-    pub hand: Vec<Hand>,
-    pub current_player_id: usize,
-    pub passed_player_ids: BTreeSet<usize>,
+    hand: Vec<Hand>,
+    current_player_id: usize,
+    passed_player_ids: BTreeSet<usize>,
 }
 
 #[derive(Debug)]
@@ -27,25 +24,13 @@ pub enum GameContinueStatus {
 }
 
 #[derive(Debug)]
-pub enum TrickContinueStatus {
+enum StepStatus {
     Continue,
     TrickOver(usize),
     GameOver(usize),
 }
 
 impl Trick {
-    pub fn new(starting_hand: Hand, next_player_id: usize) -> Self {
-        if let Hand::Pass = starting_hand {
-            panic!("Starting Hand cannot be Pass");
-        }
-
-        Self {
-            hand: vec![starting_hand],
-            current_player_id: next_player_id,
-            passed_player_ids: BTreeSet::new(),
-        }
-    }
-
     pub fn start(starting_player_id: usize, players: &mut [Player; 4], is_first: bool) -> Self {
         let player = &mut players[starting_player_id];
 
@@ -57,11 +42,18 @@ impl Trick {
                     Hand::Trips(_, _, a) if a == THREE_OF_CLUBS => break attempt,
                     Hand::Pair(_, a) if a == THREE_OF_CLUBS => break attempt,
                     Hand::Lone(a) if a == THREE_OF_CLUBS => break attempt,
-                    _ => println!("must play a hand that includes the Three of Clubs"),
+                    _ => println!("Must play a hand that includes the Three of Clubs."),
                 }
             }
         } else {
-            (player.start_trick)(&player.cards)
+            loop {
+                let attempt = (player.start_trick)(&player.cards);
+                if let Hand::Pass = attempt {
+                    println!("Starting Hand cannot be Pass.");
+                    continue;
+                }
+                break attempt;
+            }
         };
 
         println!("Player {starting_player_id} begins with {starting_hand}");
@@ -69,13 +61,17 @@ impl Trick {
 
         let next_player_id = next_player_id(starting_player_id, &BTreeSet::new());
 
-        Trick::new(starting_hand, next_player_id)
+        Self {
+            hand: vec![starting_hand],
+            current_player_id: next_player_id,
+            passed_player_ids: BTreeSet::new(),
+        }
     }
 
     pub fn do_trick(&mut self, players: &mut [Player; 4]) -> GameContinueStatus {
         // its possible the trick is started and the game is over instantly because
         // the player that started the trick finished their cards
-        if let TrickContinueStatus::GameOver(winner) = self.is_trick_over(players) {
+        if let StepStatus::GameOver(winner) = self.is_trick_over(players) {
             return GameContinueStatus::GameOver(winner);
         }
 
@@ -83,18 +79,16 @@ impl Trick {
             self.do_player_turn(players);
             let trick_status = self.is_trick_over(players);
             match trick_status {
-                TrickContinueStatus::Continue => continue,
-                TrickContinueStatus::TrickOver(last_player) => {
+                StepStatus::Continue => continue,
+                StepStatus::TrickOver(last_player) => {
                     break GameContinueStatus::NewTrick(last_player)
                 }
-                TrickContinueStatus::GameOver(winner) => {
-                    break GameContinueStatus::GameOver(winner)
-                }
+                StepStatus::GameOver(winner) => break GameContinueStatus::GameOver(winner),
             }
         }
     }
 
-    pub fn do_player_turn(&mut self, players: &mut [Player; 4]) {
+    fn do_player_turn(&mut self, players: &mut [Player; 4]) {
         assert!(
             self.passed_player_ids.len() < 4 - 1,
             "there must be at least 2 players who have not yet passed"
@@ -107,7 +101,6 @@ impl Trick {
         );
 
         let player = &mut players[self.current_player_id];
-        // println!("Player {}'s cards: {}", self.current_player_id, player);
         let submitted_hand = Trick::get_submitted_hand(player, self.hand.last().unwrap());
 
         if let Hand::Pass = submitted_hand {
@@ -124,22 +117,22 @@ impl Trick {
         self.current_player_id = next_player_id(self.current_player_id, &self.passed_player_ids);
     }
 
-    fn is_trick_over(&self, players: &[Player; 4]) -> TrickContinueStatus {
+    fn is_trick_over(&self, players: &[Player; 4]) -> StepStatus {
         for (player_id, player) in players.iter().enumerate() {
             if player.cards.is_empty() {
-                return TrickContinueStatus::GameOver(player_id);
+                return StepStatus::GameOver(player_id);
             }
         }
 
         if self.passed_player_ids.len() == (4 - 1) {
             for (player_id, _) in players.iter().enumerate() {
                 if !self.passed_player_ids.contains(&player_id) {
-                    return TrickContinueStatus::TrickOver(player_id);
+                    return StepStatus::TrickOver(player_id);
                 }
             }
             unreachable!();
         } else {
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         }
     }
 
@@ -154,18 +147,6 @@ impl Trick {
                 Err(e) => println!("{}: {}", attempt, e),
             }
         }
-    }
-}
-
-impl Display for Trick {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            // "Player: {} \nHand To Beat: {}",
-            // self.current_player_id,
-            // self.hand.last().unwrap()
-            ""
-        )
     }
 }
 
@@ -188,7 +169,7 @@ mod tests {
         let trick: Trick = Trick::start(starting_player_id, &mut players, true);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
 
         match trick.hand.last().unwrap() {
@@ -210,7 +191,7 @@ mod tests {
         let trick: Trick = Trick::start(starting_player_id, &mut players, false);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
 
         match trick.hand.last().unwrap() {
@@ -230,7 +211,7 @@ mod tests {
         let starting_player_id: usize = 2;
         let trick = Trick::start(starting_player_id, &mut players, false);
         assert!(
-            matches!(trick.is_trick_over(&players), TrickContinueStatus::GameOver(p) if p == starting_player_id)
+            matches!(trick.is_trick_over(&players), StepStatus::GameOver(p) if p == starting_player_id)
         );
         assert_eq!(trick.passed_player_ids.len(), 0);
         assert_eq!(trick.current_player_id, 3);
@@ -250,14 +231,14 @@ mod tests {
         let mut trick: Trick = Trick::start(starting_player_id, &mut players, false);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
 
         // P1 plays 7D, then P2
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
@@ -271,7 +252,7 @@ mod tests {
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
@@ -286,7 +267,7 @@ mod tests {
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"7D".parse().unwrap()),
@@ -301,7 +282,7 @@ mod tests {
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"AS".parse().unwrap()),
@@ -315,7 +296,7 @@ mod tests {
         // P3 passes, Trick is Over and P0 won the Trick
         trick.do_player_turn(&mut players);
         match trick.is_trick_over(&players) {
-            TrickContinueStatus::TrickOver(winner) => assert_eq!(winner, 0),
+            StepStatus::TrickOver(winner) => assert_eq!(winner, 0),
             a => panic!("{:?}", a),
         }
         match trick.hand.last().unwrap() {
@@ -342,14 +323,14 @@ mod tests {
         let mut trick: Trick = Trick::start(starting_player_id, &mut players, false);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
 
         // P1 plays 7D, then P2
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
@@ -363,7 +344,7 @@ mod tests {
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
@@ -378,7 +359,7 @@ mod tests {
         trick.do_player_turn(&mut players);
         assert!(matches!(
             trick.is_trick_over(&players),
-            TrickContinueStatus::Continue
+            StepStatus::Continue
         ));
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"7D".parse().unwrap()),
@@ -392,7 +373,7 @@ mod tests {
         // P0 plays Ace of Spades, Game is now over!
         trick.do_player_turn(&mut players);
         assert!(
-            matches!(trick.is_trick_over(&players), TrickContinueStatus::GameOver(p) if p == starting_player_id)
+            matches!(trick.is_trick_over(&players), StepStatus::GameOver(p) if p == starting_player_id)
         );
         match trick.hand.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"AS".parse().unwrap()),
