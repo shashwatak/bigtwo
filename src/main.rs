@@ -13,25 +13,25 @@ use crate::player::{cards_to_string, get_user_input, Player};
 use crate::trick::Trick;
 
 fn main() {
+    println!("-------------------");
+    println!("Welcome to Big Two!");
+    println!("Submit hands by typing the cards in e.g. \"3C 3D 3S\"");
+    println!("-------------------");
     let mut players = <[Player; 4]>::default();
 
-    players[0].submit_hand = |hand, cards| {
-        println!();
-        println!("Your Turn: {}", cards_to_string(&cards));
-        println!("Must Beat: {}", hand);
+    players[0].submit_hand = |_, cards| {
+        println!("=== Your Turn: {}", cards_to_string(&cards));
         get_user_input(&mut std::io::stdin().lock(), &cards)
     };
     players[0].start_game = |cards| {
-        println!();
         println!(
-            "You must start the game using the 3C: {}",
+            "=== Please start the game using the |3C|: {}",
             cards_to_string(&cards)
         );
         get_user_input(&mut std::io::stdin().lock(), &cards)
     };
     players[0].start_trick = |cards| {
-        println!();
-        println!("You may play any valid hand: {}", cards_to_string(&cards));
+        println!("=== You may play any valid hand: {}", cards_to_string(&cards));
         get_user_input(&mut std::io::stdin().lock(), &cards)
     };
 
@@ -58,6 +58,7 @@ fn main() {
 }
 
 fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
+    println!("Dealing Cards...");
     use rand::seq::SliceRandom;
     use rand::thread_rng;
     let mut rng = thread_rng();

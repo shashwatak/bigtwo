@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::io::{self, Write};
 use std::{collections::BTreeSet, io::BufRead};
 
 use crate::{
@@ -66,9 +67,10 @@ pub const START_TRICK_WITH_SMALLEST_SINGLE: fn(&Vec<Card>) -> Hand = |cards| Han
 
 pub fn get_user_input<Input: BufRead>(f: &mut Input, player_cards: &[Card]) -> Hand {
     loop {
-        println!("Please enter the cards you would like to play, seperated by spaces");
-        print!("> ");
         let mut line = String::new();
+        print!("> ");
+        
+        io::stdout().flush().unwrap();
         f.read_line(&mut line).unwrap();
 
         let mut cards = vec![];
