@@ -16,7 +16,7 @@ pub fn perform_game() {
     let mut players = <[Player; NUM_PLAYERS]>::default();
     players[0].convert_to_stdio_user();
 
-    deal_cards(&mut players, Deck::new());
+    shuffle_and_deal_cards(&mut players, Deck::new());
 
     let mut starting_player_idx = find_player_with_three_of_clubs(&players);
     println!("Player {starting_player_idx} has the Three of Clubs and may begin");
@@ -37,7 +37,9 @@ pub fn perform_game() {
     println!("Game Over, Player {winner} wins!!");
 }
 
-fn deal_cards(players: &mut [Player; NUM_PLAYERS], mut deck: Deck) {
+/// Shuffle and Deal the cards just like a regular human dealer.
+/// All players will receive 13 Cards each.
+fn shuffle_and_deal_cards(players: &mut [Player; NUM_PLAYERS], mut deck: Deck) {
     println!("Dealing Cards...");
     use rand::seq::SliceRandom;
     use rand::thread_rng;
@@ -56,6 +58,8 @@ fn deal_cards(players: &mut [Player; NUM_PLAYERS], mut deck: Deck) {
     assert_eq!(deck.cards.len(), 0);
 }
 
+///  Used to identify the player who was dealt the Three Of Clubs.
+///  The game can only begin with the player that has the Three of Clubs.
 fn find_player_with_three_of_clubs(players: &[Player; NUM_PLAYERS]) -> usize {
     for (index, player) in players.iter().enumerate() {
         if player.cards.contains(&THREE_OF_CLUBS) {
