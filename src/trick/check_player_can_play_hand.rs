@@ -1,12 +1,20 @@
+//! Checks if a specified Player can actually play the Hand they are attempting to play.
 use crate::hand::Hand;
 use crate::player::Player;
 
 use std::fmt::{Display, Formatter};
 
+/// Represents the different ways a Player's attempted Hand is not playable
 #[derive(Debug)]
 pub enum PlayHandError {
+    /// Attempted Hand must be the same number of cards as previous played Hand.
     Match,
+
+    /// Highest card of attempted Hand must be higher than the highest card of the previously
+    /// played Hand.
     HighEnough,
+
+    /// Attempted Hand has cards not found in the player's cards.
     PlayerCards,
 }
 
@@ -20,6 +28,8 @@ impl Display for PlayHandError {
     }
 }
 
+/// Checks if a specified Player can actually play the Hand they are attempting to play.
+/// Returns () if the Hand is playable, otherwise returns a specific PlayHandError.
 pub fn check_player_can_play_hand(
     current: &Hand,
     player: &Player,

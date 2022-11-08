@@ -1,9 +1,18 @@
+//! Identifies the Player who is up next.
 use std::collections::BTreeSet;
 
 use crate::constants::NUM_PLAYERS;
 
+/// Identifies the Player who is up next.
+/// # Panics:
+/// - Panics if current_player_id < NUM_PLAYERS, since the id is actually an idx into [Player; 4].
+/// - Panics if there are 0 players who have not passed, that is not a valid game state (Trick ends when only 1 remaining player has not passed).
+/// - Panics if the computed next_id is equal to the current_player_id
 pub fn next_player_id(current_player_id: usize, passed_player_ids: &BTreeSet<usize>) -> usize {
-    assert!(current_player_id < NUM_PLAYERS);
+    assert!(
+        current_player_id < NUM_PLAYERS,
+        "{current_player_id} is an index into an array of Players so it must be < NUM_PLAYERS"
+    );
     assert!(
         passed_player_ids.len() < NUM_PLAYERS,
         "all players cannot pass, one player must have not passed"
