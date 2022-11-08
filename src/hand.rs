@@ -1,3 +1,6 @@
+//! Represents any one of the allowed combinations of cards (known as a "Hand").
+//! Cannot be used to represent an unrecognized / nonsensical combination.
+
 use core::fmt;
 use std::collections::BTreeSet;
 use std::str::FromStr;
@@ -5,11 +8,18 @@ use std::str::FromStr;
 use crate::card::Card;
 use crate::card::ParseCardError;
 
+/// Represents any one of the allowed combinations of cards (known as a "Hand").
+/// Cannot be used to represent an unrecognized / nonsensical combination.
+/// TODO: Fivers: Straight, Flush, FullHouse, FourPlusKicker, StraightFlush
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Hand {
+    /// aka Singles, Highs, Loners, Solos
     Lone(Card),
+    /// aka Dubs, Dual, Two-of-a-Kind
     Pair(Card, Card),
+    /// aka Three-of-a-Kind
     Trips(Card, Card, Card),
+    /// No Hand, No Cards
     Pass,
 }
 
@@ -24,12 +34,18 @@ impl fmt::Display for Hand {
     }
 }
 
+/// Represents the possible ways that a string can fail to parse into a reasonable Hand.
 #[derive(Debug)]
 pub enum ParseHandError {
-    BadLen,
+    /// Incorrect number off chars, does not correspond to any Hand.
+    BadLength,
+    /// Not able to parse one of the Cards in this string.
     BadCard(ParseCardError),
+    /// Playing with a single deck, only one of each card allowed.
     DuplicateCard,
+    /// For programmer convenience, must provide Cards in descending order>
     NotSortedDescending,
+    /// All cards were parsed, in the correct order, but the result is not a valid Hand.
     InvalidHand(InvalidHandError),
 }
 
@@ -39,9 +55,14 @@ impl From<ParseCardError> for ParseHandError {
     }
 }
 
+/// Represents the ways valid Cards can fail to combine into a valid Hand.
+/// TODO: represent invalid 5 card hands
+/// TODO 2: this might actually be kinda redundant, could just remove it?
 #[derive(Debug)]
 pub enum InvalidHandError {
+    /// Two cards of different Rank
     UnmatchedPair,
+    /// Three cards, at least one is a different Rank
     UnmatchedTrips,
 }
 
@@ -52,6 +73,7 @@ impl From<InvalidHandError> for ParseHandError {
 }
 
 impl Hand {
+    /// Given a slice of Cards, either return a Hand, or an Error
     pub fn try_from_cards(cards: &[Card]) -> Result<Hand, ParseHandError> {
         Self::sanitize_cards(cards)?;
         match cards {
@@ -59,10 +81,11 @@ impl Hand {
             [a] => Ok(Hand::Lone(*a)),
             [a, b] => Ok(Hand::try_pair(*a, *b)?),
             [a, b, c] => Ok(Hand::try_trips(*a, *b, *c)?),
-            _ => Err(ParseHandError::BadLen),
+            _ => Err(ParseHandError::BadLength),
         }
     }
 
+    /// Given two cards, return a Pair or an Error
     pub fn try_pair(first: Card, second: Card) -> Result<Hand, InvalidHandError> {
         assert!(second < first);
         if first.rank == second.rank {
@@ -72,6 +95,7 @@ impl Hand {
         }
     }
 
+    /// Given three cards, return a Trip or an Error
     pub fn try_trips(first: Card, second: Card, third: Card) -> Result<Hand, InvalidHandError> {
         assert!(third < second);
         assert!(second < first);
@@ -82,6 +106,7 @@ impl Hand {
         }
     }
 
+    /// Return an Error if this slice of Cards is incoherent.
     pub fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
         let mut unique_cards: BTreeSet<&Card> = BTreeSet::new();
         for card in cards {
@@ -125,6 +150,7 @@ impl FromStr for Hand {
 }
 
 impl Hand {
+    /// Returns true when both provided Hands are the same variant.
     pub fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
         matches!(
             (previous, attempted),
@@ -147,7 +173,7 @@ mod tests {
         assert!(matches!(hand, Err(ParseHandError::BadCard(_))));
 
         let hand = "7D 5C 4C 3C".to_string().parse::<Hand>();
-        assert!(matches!(hand, Err(ParseHandError::BadLen)));
+        assert!(matches!(hand, Err(ParseHandError::BadLength)));
 
         let hand = "3C 4D".to_string().parse::<Hand>();
         assert!(matches!(hand, Err(ParseHandError::NotSortedDescending)));
