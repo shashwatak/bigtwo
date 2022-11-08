@@ -28,12 +28,22 @@ pub enum TrickResult {
 
 /// Performs the entire Trick and returns the TrickResult.
 /// It is expected that the caller will keep calling this until it produces a TrickResult::GameOver.
+///
+/// # Arguments
+/// - starting_player_idx: the caller is responsible for deciding which player must begin.
+/// - players: the caller is responsible for keeping track of the players.
+/// - is_first_trick_of_game: the caller is responsible for knowing if this is the first trick or
+/// not (if this is the first then special 3 of Clubs logic will be used).
+///
+/// # Panics
+/// - Will panic for any internal programming error which causes the Trick to enter an illogical /
+/// incoherent state.
 pub fn perform_trick(
-    starting_player_id: usize,
+    starting_player_idx: usize,
     players: &mut [Player; NUM_PLAYERS],
     is_first_trick_of_game: bool,
 ) -> TrickResult {
-    let mut trick = Trick::start(starting_player_id, players, is_first_trick_of_game);
+    let mut trick = Trick::start(starting_player_idx, players, is_first_trick_of_game);
     trick.do_trick(players)
 }
 
