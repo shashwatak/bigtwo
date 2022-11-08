@@ -30,6 +30,9 @@ pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
         if card_errs.is_empty() {
             cards.sort();
             cards.reverse();
+            if let Err(e) = Hand::sanitize_cards(&cards) {
+                println!("error: sanitize cards failed {:?}", e);
+            }
             let maybe_hand = Hand::try_from_cards(&cards);
             if let Ok(hand) = maybe_hand {
                 break hand;

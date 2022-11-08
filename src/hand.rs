@@ -37,8 +37,6 @@ impl fmt::Display for Hand {
 /// Represents the possible ways that a string can fail to parse into a reasonable Hand.
 #[derive(Debug)]
 pub enum ParseHandError {
-    /// Incorrect number off chars, does not correspond to any Hand.
-    BadLength,
     /// Not able to parse one of the Cards in this string.
     BadCard(ParseCardError),
     /// Playing with a single deck, only one of each card allowed.
@@ -64,6 +62,8 @@ pub enum InvalidHandError {
     UnmatchedPair,
     /// Three cards, at least one is a different Rank
     UnmatchedTrips,
+    /// Incorrect number of cards (0, 4, 6+)
+    WrongQuantity,
 }
 
 impl From<InvalidHandError> for ParseHandError {
@@ -75,13 +75,12 @@ impl From<InvalidHandError> for ParseHandError {
 impl Hand {
     /// Given a slice of Cards, either return a Hand, or an Error
     pub fn try_from_cards(cards: &[Card]) -> Result<Hand, ParseHandError> {
-        Self::sanitize_cards(cards)?;
         match cards {
             [] => Ok(Hand::Pass),
             [a] => Ok(Hand::Lone(*a)),
             [a, b] => Ok(Hand::try_pair(*a, *b)?),
             [a, b, c] => Ok(Hand::try_trips(*a, *b, *c)?),
-            _ => Err(ParseHandError::BadLength),
+            _ => Err(ParseHandError::InvalidHand(InvalidHandError::WrongQuantity)),
         }
     }
 
@@ -143,9 +142,9 @@ impl FromStr for Hand {
             cards.push(maybe_card.parse()?);
         }
 
-        Hand::sanitize_cards(&cards[..])?;
+        Self::sanitize_cards(&cards[..])?;
 
-        Hand::try_from_cards(&cards)
+        Self::try_from_cards(&cards)
     }
 }
 
@@ -172,8 +171,14 @@ mod tests {
         let hand = "AJ".to_string().parse::<Hand>();
         assert!(matches!(hand, Err(ParseHandError::BadCard(_))));
 
+        let hand = "7D 5C 4C 3".to_string().parse::<Hand>();
+        assert!(matches!(hand, Err(ParseHandError::BadCard(_))));
+
         let hand = "7D 5C 4C 3C".to_string().parse::<Hand>();
-        assert!(matches!(hand, Err(ParseHandError::BadLength)));
+        assert!(matches!(
+            hand,
+            Err(ParseHandError::InvalidHand(InvalidHandError::WrongQuantity))
+        ));
 
         let hand = "3C 4D".to_string().parse::<Hand>();
         assert!(matches!(hand, Err(ParseHandError::NotSortedDescending)));
