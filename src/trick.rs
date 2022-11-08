@@ -1,6 +1,11 @@
 //! Represents the current state of a Trick, with logic to step through
 //! the trick, collecting player inputs, and progressing the Trick.
 //! NOTE: A single Game is composed of a series of Tricks.
+//!
+//! The Caller is expected to keep track of the Players, provide the Players with Cards,
+//! and keep track of which player is supposed to begin the Trick.
+//!
+//! Use with is fn perform_trick(...) -> TrickResult
 
 mod check_player_can_play_hand;
 use check_player_can_play_hand::check_player_can_play_hand;
