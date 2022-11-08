@@ -38,7 +38,7 @@ impl Default for Player {
 
 /// useful for printing
 fn cards_to_string(cards: &[Card]) -> String {
-    cards.iter().map(|card| format!(" |{}| ", card)).collect()
+    cards.iter().map(|card| format!("|{}|", card)).collect()
 }
 
 impl Player {
@@ -47,17 +47,17 @@ impl Player {
     pub fn convert_to_stdio_user(&mut self) {
         self.submit_hand = |_, cards| {
             println!("=== Your Turn.");
-            println!("-> {{ {} }}", cards_to_string(cards));
+            println!("=== {}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
         self.start_game = |cards| {
             println!("=== Please start the game using the |3C| .");
-            println!("-> {{ {} }}", cards_to_string(cards));
+            println!("=== {}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
         self.start_trick = |cards| {
             println!("=== You may play any valid hand.");
-            println!("-> {{ {} }}", cards_to_string(cards));
+            println!("=== {}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
     }

@@ -7,7 +7,7 @@ use crate::hand::Hand;
 pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
     loop {
         let mut line = String::new();
-        print!("> ");
+        print!("=== > ");
 
         io::stdout().flush().unwrap();
         f.read_line(&mut line).unwrap();
