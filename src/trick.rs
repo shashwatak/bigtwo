@@ -1,3 +1,7 @@
+//! Represents the current state of a Trick, with logic to step through
+//! the trick, collecting player inputs, and progressing the Trick.
+//! NOTE: A single Game is composed of a series of Tricks.
+
 mod check_player_can_play_hand;
 use check_player_can_play_hand::check_player_can_play_hand;
 
@@ -10,27 +14,53 @@ use crate::card::THREE_OF_CLUBS;
 use crate::hand::Hand;
 use crate::player::Player;
 
+
+/// Represents the current state of a Trick, keeps track of which hands have been played and who
+/// has passed, and who is the current player.
 #[derive(Debug)]
 pub struct Trick {
+    /// The hand used to start the Trick, and all following played hands.
     hand: Vec<Hand>,
+
+    /// Used to index into a [Player; 4] which is passed into functions 
+    /// TODO: (maybe) use lifetimes and a reference to [Player; 4].
     current_player_id: usize,
+
+    /// Keeps track of all players who have passed so far this Trick
     passed_player_ids: BTreeSet<usize>,
 }
 
+/// Returned at the end of a Trick to signify to the caller 
 #[derive(Debug)]
 pub enum GameContinueStatus {
+    /// Informs the caller that this Trick ended without anybody winning the Game, so another Trick
+    /// is needed.
     NewTrick(usize),
+    
+    /// Informs the caller that this Trick ended with somebody winning the Game.
     GameOver(usize),
 }
 
+/// Returned at the end of each Player's turn, informs the caller whether the Trick has ended (and
+/// how), or ig the Trick continues
 #[derive(Debug)]
 enum StepStatus {
+
+    /// Informs the caller that this Trick is not over, keep playing.
     Continue,
+
+    /// Informs the caller that this Trick ended without anybody winning the Game, so another Trick
+    /// is needed.
     TrickOver(usize),
+
+    /// Informs the caller that this Trick ended with somebody winning the Game.
     GameOver(usize),
 }
 
 impl Trick {
+
+    /// Used to construct and initialize a new Trick, starting_player_id will be used to index
+    /// into players, to request their starting hand and take their cards.
     pub fn start(starting_player_id: usize, players: &mut [Player; 4], is_first: bool) -> Self {
         let player = &mut players[starting_player_id];
 
@@ -68,6 +98,9 @@ impl Trick {
         }
     }
 
+    /// Used to perform the entirety of the Trick, running all Player's turns,
+    /// collecting their Hands, keeping track of their Passes, and ending when
+    /// the Game ends, or when all but one Player has passed.
     pub fn do_trick(&mut self, players: &mut [Player; 4]) -> GameContinueStatus {
         // its possible the trick is started and the game is over instantly because
         // the player that started the trick finished their cards
@@ -88,6 +121,12 @@ impl Trick {
         }
     }
 
+    /// Used to collect a Player's Hand (or Pass) on their turn.
+    ///
+    /// # Panics
+    ///
+    /// - If there are fewer than 2 players remaining in the Trick (i.e. have not passed)
+    /// - If any of the players have 0 cards (this would mean the game is already over)/
     fn do_player_turn(&mut self, players: &mut [Player; 4]) {
         assert!(
             self.passed_player_ids.len() < 4 - 1,
@@ -117,6 +156,8 @@ impl Trick {
         self.current_player_id = next_player_id(self.current_player_id, &self.passed_player_ids);
     }
 
+    /// Returns StepStatus::GameOver if a player has 0 cards (that player has won).
+    /// Returns StepStatus::TrickOver if only one player remains in the trick (3 have passed).
     fn is_trick_over(&self, players: &[Player; 4]) -> StepStatus {
         for (player_id, player) in players.iter().enumerate() {
             if player.cards.is_empty() {
@@ -136,6 +177,8 @@ impl Trick {
         }
     }
 
+    /// Keep asking the player to submit a Hand, until they submit a legal playable Hand.
+    /// (i.e. keep getting their inputs until they submit valid input that can progess the game).
     fn get_submitted_hand(player: &Player, hand_to_beat: &Hand) -> Hand {
         loop {
             let attempt = (player.submit_hand)(hand_to_beat, &player.cards);
