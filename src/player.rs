@@ -70,6 +70,8 @@ impl Display for Player {
 }
 
 impl Player {
+    /// Used by the caller / game logic to take a Player's cards (ostensibly after the Player has
+    /// played them legally).
     pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
         assert!(self.has_cards(hand));
         match hand {
@@ -80,6 +82,9 @@ impl Player {
         }
     }
 
+    /// Used internally to remove any slice of cards from a Player's cards.
+    /// # Panics
+    /// - Will panic if any of cards_to_remove are not in Player's cards.
     fn remove_cards_from_cards(&mut self, cards_to_remove: &[Card]) {
         for to_remove in cards_to_remove {
             let index = self
@@ -91,11 +96,14 @@ impl Player {
         }
     }
 
+    /// Used to make sure the Player actually has the cards they tried to play.
     pub fn has_cards(&self, hand: &Hand) -> bool {
         Player::hand_in_cards(hand, &self.cards)
     }
 
-    pub fn hand_in_cards(hand: &Hand, cards: &[Card]) -> bool {
+    /// Used internally, converts players cards into BTreeSet to check if cards from hand are
+    /// present.
+    fn hand_in_cards(hand: &Hand, cards: &[Card]) -> bool {
         let cards: BTreeSet<&Card> = BTreeSet::from_iter(cards);
         match hand {
             Hand::Lone(a) => cards.contains(a),
