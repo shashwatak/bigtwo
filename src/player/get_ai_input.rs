@@ -36,7 +36,7 @@ mod tests {
 
     use super::*;
     use crate::card::{rank::Rank, suit::Suit};
-    use crate::test_util::tests::vec_card_from_str;
+    use crate::tests::test_util::vec_card_from_str;
 
     #[test]
     fn test_play_smallest_single_or_pass() {

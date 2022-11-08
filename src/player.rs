@@ -110,7 +110,7 @@ impl Player {
 mod tests {
 
     use super::*;
-    use crate::test_util::tests::vec_card_from_str;
+    use crate::tests::test_util::vec_card_from_str;
 
     #[test]
     fn test_has_cards() {

@@ -3,7 +3,6 @@ mod constants;
 mod deck;
 mod hand;
 mod player;
-mod test_util;
 mod trick;
 
 use card::THREE_OF_CLUBS;
@@ -68,4 +67,11 @@ fn find_player_with_three_of_clubs(players: &[Player; NUM_PLAYERS]) -> usize {
         }
     }
     unreachable!();
+}
+
+#[cfg(test)]
+mod tests {
+
+pub mod test_util;
+
 }
