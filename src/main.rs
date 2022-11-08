@@ -1,23 +1,23 @@
 mod card;
+mod constants;
 mod deck;
 mod hand;
 mod player;
 mod test_util;
 mod trick;
 
-use trick::GameContinueStatus;
-
-use crate::card::THREE_OF_CLUBS;
-use crate::deck::Deck;
-use crate::player::Player;
-use crate::trick::Trick;
+use card::THREE_OF_CLUBS;
+use constants::NUM_PLAYERS;
+use deck::Deck;
+use player::Player;
+use trick::{GameContinueStatus, Trick};
 
 fn main() {
     println!("-------------------");
     println!("Welcome to Big Two!");
     println!("Submit hands by typing the cards in e.g. \"3C 3D 3S\"");
     println!("-------------------");
-    let mut players = <[Player; 4]>::default();
+    let mut players = <[Player; NUM_PLAYERS]>::default();
     players[0].convert_to_stdio_user();
 
     deal_cards(&mut players, Deck::new());
@@ -42,7 +42,7 @@ fn main() {
     println!("Game Over, Player {winner} wins!!");
 }
 
-fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
+fn deal_cards(players: &mut [Player; NUM_PLAYERS], mut deck: Deck) {
     println!("Dealing Cards...");
     use rand::seq::SliceRandom;
     use rand::thread_rng;
@@ -51,7 +51,7 @@ fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
 
     let mut player_index: usize = 0;
     while let Some(card) = deck.cards.pop() {
-        let index = player_index % 4;
+        let index = player_index % NUM_PLAYERS;
         players[index].cards.push(card);
         player_index += 1;
     }
@@ -61,7 +61,7 @@ fn deal_cards(players: &mut [Player; 4], mut deck: Deck) {
     assert_eq!(deck.cards.len(), 0);
 }
 
-fn find_player_with_three_of_clubs(players: &[Player; 4]) -> usize {
+fn find_player_with_three_of_clubs(players: &[Player; NUM_PLAYERS]) -> usize {
     for (index, player) in players.iter().enumerate() {
         if player.cards.contains(&THREE_OF_CLUBS) {
             return index;

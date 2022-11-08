@@ -11,9 +11,9 @@ use next_player_id::next_player_id;
 use std::collections::BTreeSet;
 
 use crate::card::THREE_OF_CLUBS;
+use crate::constants::NUM_PLAYERS;
 use crate::hand::Hand;
 use crate::player::Player;
-
 
 /// Represents the current state of a Trick, keeps track of which hands have been played and who
 /// has passed, and who is the current player.
@@ -22,21 +22,21 @@ pub struct Trick {
     /// The hand used to start the Trick, and all following played hands.
     hand: Vec<Hand>,
 
-    /// Used to index into a [Player; 4] which is passed into functions 
-    /// TODO: (maybe) use lifetimes and a reference to [Player; 4].
+    /// Used to index into a [Player; NUM_PLAYERS] which is passed into functions
+    /// TODO: (maybe) use lifetimes and a reference to [Player; NUM_PLAYERS].
     current_player_id: usize,
 
     /// Keeps track of all players who have passed so far this Trick
     passed_player_ids: BTreeSet<usize>,
 }
 
-/// Returned at the end of a Trick to signify to the caller 
+/// Returned at the end of a Trick to signify to the caller
 #[derive(Debug)]
 pub enum GameContinueStatus {
     /// Informs the caller that this Trick ended without anybody winning the Game, so another Trick
     /// is needed.
     NewTrick(usize),
-    
+
     /// Informs the caller that this Trick ended with somebody winning the Game.
     GameOver(usize),
 }
@@ -45,7 +45,6 @@ pub enum GameContinueStatus {
 /// how), or ig the Trick continues
 #[derive(Debug)]
 enum StepStatus {
-
     /// Informs the caller that this Trick is not over, keep playing.
     Continue,
 
@@ -58,10 +57,13 @@ enum StepStatus {
 }
 
 impl Trick {
-
     /// Used to construct and initialize a new Trick, starting_player_id will be used to index
     /// into players, to request their starting hand and take their cards.
-    pub fn start(starting_player_id: usize, players: &mut [Player; 4], is_first: bool) -> Self {
+    pub fn start(
+        starting_player_id: usize,
+        players: &mut [Player; NUM_PLAYERS],
+        is_first: bool,
+    ) -> Self {
         let player = &mut players[starting_player_id];
 
         let starting_hand = if is_first {
@@ -101,7 +103,7 @@ impl Trick {
     /// Used to perform the entirety of the Trick, running all Player's turns,
     /// collecting their Hands, keeping track of their Passes, and ending when
     /// the Game ends, or when all but one Player has passed.
-    pub fn do_trick(&mut self, players: &mut [Player; 4]) -> GameContinueStatus {
+    pub fn do_trick(&mut self, players: &mut [Player; NUM_PLAYERS]) -> GameContinueStatus {
         // its possible the trick is started and the game is over instantly because
         // the player that started the trick finished their cards
         if let StepStatus::GameOver(winner) = self.is_trick_over(players) {
@@ -127,9 +129,9 @@ impl Trick {
     ///
     /// - If there are fewer than 2 players remaining in the Trick (i.e. have not passed)
     /// - If any of the players have 0 cards (this would mean the game is already over)/
-    fn do_player_turn(&mut self, players: &mut [Player; 4]) {
+    fn do_player_turn(&mut self, players: &mut [Player; NUM_PLAYERS]) {
         assert!(
-            self.passed_player_ids.len() < 4 - 1,
+            self.passed_player_ids.len() < NUM_PLAYERS - 1,
             "there must be at least 2 players who have not yet passed"
         );
 
@@ -158,14 +160,14 @@ impl Trick {
 
     /// Returns StepStatus::GameOver if a player has 0 cards (that player has won).
     /// Returns StepStatus::TrickOver if only one player remains in the trick (3 have passed).
-    fn is_trick_over(&self, players: &[Player; 4]) -> StepStatus {
+    fn is_trick_over(&self, players: &[Player; NUM_PLAYERS]) -> StepStatus {
         for (player_id, player) in players.iter().enumerate() {
             if player.cards.is_empty() {
                 return StepStatus::GameOver(player_id);
             }
         }
 
-        if self.passed_player_ids.len() == (4 - 1) {
+        if self.passed_player_ids.len() == (NUM_PLAYERS - 1) {
             for (player_id, _) in players.iter().enumerate() {
                 if !self.passed_player_ids.contains(&player_id) {
                     return StepStatus::TrickOver(player_id);
@@ -201,9 +203,9 @@ mod tests {
 
     #[test]
     fn test_trick_start() {
-        // setup a trick where 4 players are dealt cards, P1 initializes the Trick with 3C, P2 is
+        // setup a trick where NUM_PLAYERS players are dealt cards, P1 initializes the Trick with 3C, P2 is
         // next
-        let mut players = <[Player; 4]>::default();
+        let mut players = <[Player; NUM_PLAYERS]>::default();
         players[0].cards = vec_card_from_str("AS");
         players[1].cards = vec_card_from_str("3C 4D 7S 8D");
         players[2].cards = vec_card_from_str("3H");
@@ -223,9 +225,9 @@ mod tests {
         assert_eq!(trick.current_player_id, 2);
         assert_eq!(players[starting_player_id].cards.len(), 3);
 
-        // setup a trick where 4 players are dealt cards, P1 initializes the Trick with 4D, P2 is
+        // setup a trick where NUM_PLAYERS players are dealt cards, P1 initializes the Trick with 4D, P2 is
         // next
-        let mut players = <[Player; 4]>::default();
+        let mut players = <[Player; NUM_PLAYERS]>::default();
         players[0].cards = vec_card_from_str("AS");
         players[1].cards = vec_card_from_str("4D 7S");
         players[2].cards = vec_card_from_str("3H");
@@ -246,7 +248,7 @@ mod tests {
         assert_eq!(players[starting_player_id].cards.len(), 1);
 
         // setup a trick where the starting player will win as soon as they initialize the trick
-        let mut players = <[Player; 4]>::default();
+        let mut players = <[Player; NUM_PLAYERS]>::default();
         players[0].cards = vec_card_from_str("2S");
         players[1].cards = vec_card_from_str("3D");
         players[2].cards = vec_card_from_str("3H");
@@ -263,9 +265,9 @@ mod tests {
 
     #[test]
     fn test_trick_start_step_trick_over() {
-        // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 6D, P1 is
+        // setup a trick where NUM_PLAYERS players are dealt cards, P0 initializes the Trick with 6D, P1 is
         // next
-        let mut players = <[Player; 4]>::default();
+        let mut players = <[Player; NUM_PLAYERS]>::default();
         players[0].cards = vec_card_from_str("6D AS 2S");
         players[1].cards = vec_card_from_str("3D 4H");
         players[2].cards = vec_card_from_str("3H 4D");
@@ -355,9 +357,9 @@ mod tests {
 
     #[test]
     fn test_trick_start_step_game_over() {
-        // setup a trick where 4 players are dealt cards, P0 initializes the Trick with 6D, P1 is
+        // setup a trick where NUM_PLAYERS players are dealt cards, P0 initializes the Trick with 6D, P1 is
         // next
-        let mut players = <[Player; 4]>::default();
+        let mut players = <[Player; NUM_PLAYERS]>::default();
         players[0].cards = vec_card_from_str("6D AS");
         players[1].cards = vec_card_from_str("3D 4H");
         players[2].cards = vec_card_from_str("3H 4D");

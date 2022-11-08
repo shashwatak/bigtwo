@@ -1,13 +1,15 @@
 use std::collections::BTreeSet;
 
+use crate::constants::NUM_PLAYERS;
+
 pub fn next_player_id(current_player_id: usize, passed_player_ids: &BTreeSet<usize>) -> usize {
-    assert!(current_player_id < 4);
+    assert!(current_player_id < NUM_PLAYERS);
     assert!(
-        passed_player_ids.len() < 4,
+        passed_player_ids.len() < NUM_PLAYERS,
         "all players cannot pass, one player must have not passed"
     );
-    for i in 1..4 {
-        let next_id = (current_player_id + i) % 4;
+    for i in 1..NUM_PLAYERS {
+        let next_id = (current_player_id + i) % NUM_PLAYERS;
         if !passed_player_ids.contains(&next_id) {
             assert_ne!(current_player_id, next_id);
             return next_id;
