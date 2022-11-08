@@ -15,10 +15,32 @@ use crate::constants::NUM_PLAYERS;
 use crate::hand::Hand;
 use crate::player::Player;
 
+/// Returned at the end of a Trick to signify to the caller
+#[derive(Debug)]
+pub enum TrickResult {
+    /// Informs the caller that this Trick ended without anybody winning the Game, so another Trick
+    /// is needed.
+    NewTrick(usize),
+
+    /// Informs the caller that this Trick ended with somebody winning the Game.
+    GameOver(usize),
+}
+
+/// Performs the entire Trick and returns the TrickResult.
+/// It is expected that the caller will keep calling this until it produces a TrickResult::GameOver.
+pub fn perform_trick(
+    starting_player_id: usize,
+    players: &mut [Player; NUM_PLAYERS],
+    is_first_trick_of_game: bool,
+) -> TrickResult {
+    let mut trick = Trick::start(starting_player_id, players, is_first_trick_of_game);
+    trick.do_trick(players)
+}
+
 /// Represents the current state of a Trick, keeps track of which hands have been played and who
 /// has passed, and who is the current player.
 #[derive(Debug)]
-pub struct Trick {
+struct Trick {
     /// The hand used to start the Trick, and all following played hands.
     hand: Vec<Hand>,
 
@@ -28,17 +50,6 @@ pub struct Trick {
 
     /// Keeps track of all players who have passed so far this Trick
     passed_player_ids: BTreeSet<usize>,
-}
-
-/// Returned at the end of a Trick to signify to the caller
-#[derive(Debug)]
-pub enum GameContinueStatus {
-    /// Informs the caller that this Trick ended without anybody winning the Game, so another Trick
-    /// is needed.
-    NewTrick(usize),
-
-    /// Informs the caller that this Trick ended with somebody winning the Game.
-    GameOver(usize),
 }
 
 /// Returned at the end of each Player's turn, informs the caller whether the Trick has ended (and
@@ -59,7 +70,7 @@ enum StepStatus {
 impl Trick {
     /// Used to construct and initialize a new Trick, starting_player_id will be used to index
     /// into players, to request their starting hand and take their cards.
-    pub fn start(
+    fn start(
         starting_player_id: usize,
         players: &mut [Player; NUM_PLAYERS],
         is_first: bool,
@@ -103,11 +114,11 @@ impl Trick {
     /// Used to perform the entirety of the Trick, running all Player's turns,
     /// collecting their Hands, keeping track of their Passes, and ending when
     /// the Game ends, or when all but one Player has passed.
-    pub fn do_trick(&mut self, players: &mut [Player; NUM_PLAYERS]) -> GameContinueStatus {
+    fn do_trick(&mut self, players: &mut [Player; NUM_PLAYERS]) -> TrickResult {
         // its possible the trick is started and the game is over instantly because
         // the player that started the trick finished their cards
         if let StepStatus::GameOver(winner) = self.is_trick_over(players) {
-            return GameContinueStatus::GameOver(winner);
+            return TrickResult::GameOver(winner);
         }
 
         loop {
@@ -115,10 +126,8 @@ impl Trick {
             let trick_status = self.is_trick_over(players);
             match trick_status {
                 StepStatus::Continue => continue,
-                StepStatus::TrickOver(last_player) => {
-                    break GameContinueStatus::NewTrick(last_player)
-                }
-                StepStatus::GameOver(winner) => break GameContinueStatus::GameOver(winner),
+                StepStatus::TrickOver(last_player) => break TrickResult::NewTrick(last_player),
+                StepStatus::GameOver(winner) => break TrickResult::GameOver(winner),
             }
         }
     }

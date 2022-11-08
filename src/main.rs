@@ -9,7 +9,7 @@ use card::THREE_OF_CLUBS;
 use constants::NUM_PLAYERS;
 use deck::Deck;
 use player::Player;
-use trick::{GameContinueStatus, Trick};
+use trick::{perform_trick, TrickResult};
 
 fn main() {
     println!("-------------------");
@@ -23,15 +23,14 @@ fn main() {
 
     let mut starting_player_idx = find_player_with_three_of_clubs(&players);
     println!("Player {starting_player_idx} has the Three of Clubs and may begin");
-    let mut is_first_trick = true;
+    let mut is_first_trick_of_game = true;
 
     let winner: usize = loop {
-        let mut trick = Trick::start(starting_player_idx, &mut players, is_first_trick);
-        is_first_trick = false;
-        let game_status = trick.do_trick(&mut players);
-        match game_status {
-            GameContinueStatus::GameOver(winner) => break winner,
-            GameContinueStatus::NewTrick(new_starting_player_idx) => {
+        let trick_result = perform_trick(starting_player_idx, &mut players, is_first_trick_of_game);
+        is_first_trick_of_game = false;
+        match trick_result {
+            TrickResult::GameOver(winner) => break winner,
+            TrickResult::NewTrick(new_starting_player_idx) => {
                 starting_player_idx = new_starting_player_idx;
                 println!("Player {starting_player_idx} wins the trick (everybody else passed) and starts the next trick");
             }
@@ -72,6 +71,5 @@ fn find_player_with_three_of_clubs(players: &[Player; NUM_PLAYERS]) -> usize {
 #[cfg(test)]
 mod tests {
 
-pub mod test_util;
-
+    pub mod test_util;
 }
