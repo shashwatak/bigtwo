@@ -27,4 +27,4 @@ jobs:
     - name: Publish Docs
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        folder: target/docs/
+        folder: target/doc/
