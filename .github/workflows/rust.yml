@@ -7,12 +7,19 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
 
@@ -24,7 +31,11 @@ jobs:
       run: cargo test --verbose
     - name: Generate Docs
       run: cargo doc --verbose
-    - name: Publish Docs
-      uses: JamesIves/github-pages-deploy-action@v4
+    - name: Upload Docs as Artifact
+      uses:  actions/upload-pages-artifact 
       with:
-        folder: target/doc/
+        input: target/doc/
+    - name: Deploy Docs Artifact to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+
