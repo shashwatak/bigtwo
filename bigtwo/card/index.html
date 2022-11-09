@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Big Two"><meta name="keywords" content="rust, rustlang, rust-lang, card"><title>bigtwo::card - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../bigtwo/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../bigtwo/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module card</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../bigtwo/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">bigtwo</a>::<wbr><a class="mod" href="#">card</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/bigtwo/card.rs.html#1-117">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="big-two"><a href="#big-two">Big Two</a></h2>
+<p><a href="https://en.wikipedia.org/wiki/Big_two">A card game of Cantonese origin</a>, played by children
+and adults alike across the world, with nothing more than a Standard 52 Card Deck.</p>
+<h3 id="game-rules"><a href="#game-rules">Game Rules</a></h3>
+<p>Please keep in mind, Big Two has many variations, this is merely one interpretation.</p>
+<h4 id="objective"><a href="#objective">Objective</a></h4>
+<ul>
+<li>Take turns playing cards, following the rules for valid combos</li>
+<li>First player to have 0 cards wins!</li>
+</ul>
+<h4 id="initialization"><a href="#initialization">Initialization</a></h4>
+<ul>
+<li>52 Shuffled Cards dealt to 4 Players, 13 each</li>
+<li>Player who has the Three of Clubs is first</li>
+</ul>
+<h4 id="starting-a-trick"><a href="#starting-a-trick">Starting a Trick</a></h4>
+<ul>
+<li><strong>First Trick Only</strong>: Player with the Three of Clubs starts, they must play a valid hand that contains the Three of Clubs.</li>
+<li><strong>All Other Tricks</strong>: Player who won the previous Trick gets to start, with any valid hand that they can make with their hand.</li>
+<li>Next Player is Counter-Clockwise.</li>
+</ul>
+<h4 id="trick-loop"><a href="#trick-loop">Trick Loop</a></h4>
+<ul>
+<li>Current Player either:
+<ul>
+<li>Plays a valid hand from their cards, that <a href="#comparing-hands">“beats”</a> the previously played hand.
+<ul>
+<li>If these are the Player’s last cards, Gamw Over and Player Wins.</li>
+</ul>
+</li>
+<li>Passes, plays no cards and exits the Trick.
+<ul>
+<li>If this is the 3rd player to Exit the Trick, i.e. there is only one other player remaining in the Trick, then the Trick is over, last remaining player in Trick wins the Trick</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Counter-Clockwise to next Player (who has not already passed).</li>
+</ul>
+<h4 id="valid-hands"><a href="#valid-hands">Valid Hands</a></h4>
+<p>The following are the possuble valid hands, in increasing order of rareness and value.</p>
+<ul>
+<li>Lones (aka Singles, High Card): Just a single Card.</li>
+<li>Pairs (aka Dubs, Two-Of-A-Kind): Two Cards of the same Rank.</li>
+<li>Trips (aka Three-Of-A-Kind): Three Cards of the same Rank.</li>
+<li>(TODO) Fivers (aka Five Card hands):
+<ul>
+<li>Straight: each Card in the Hand is of consecutive Rank from the previous Card in the Hand.</li>
+<li>Flush: all 5 Cards are the same Suit.</li>
+<li>Full-House: a Pair and a Trip.</li>
+<li>Four-Of-A-Kind-Plus-Kicker: 4 cards of the same Rank, plus any arbitrary additional card.</li>
+<li>Straigh-Flush: both a Straight and a Flush at the same time.</li>
+</ul>
+</li>
+<li>(TODO) Bombs
+<ul>
+<li>Bombs are special combos that may be played on anything except Lones.
+<ul>
+<li>i.e. They are not restricted to only being played on Hands of the same number of Cards.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="comparing-hands"><a href="#comparing-hands">Comparing Hands</a></h4>
+<p>When playing a Hand after another player, the incoming Hand must “beat” the previous Hand.</p>
+<p>Rank always takes precedence to Suit! E.g. a Seven of Clubs beats a Six of Spades.</p>
+<ul>
+<li>Lones can only be beaten by higher Lones.
+<ul>
+<li>Bombs CAN NOT be played upon Lones.</li>
+</ul>
+</li>
+<li>Pairs can only be beaten by higher Pairs or Bombs.</li>
+<li>Trups can only be beaten by higher Trips or Bombs.</li>
+<li>Fivers can be beaten by higher Fivers or Bombs.
+<ul>
+<li>Between any two different types of Fivers, the higher type always wins.
+<ul>
+<li>i.e. any Straigh-Flush beats every Four-Of-A-Kind-Plus-Kicker, and so on.</li>
+</ul>
+</li>
+<li>between Straights, compare the highest card in each (Rank first, then Suit).</li>
+<li>between Flushes, compare the Rank of the highest card in each.</li>
+<li>between Full-Houses, compare the Rank of the Trips.
+<ul>
+<li>Pairs Rank is disregarded.</li>
+</ul>
+</li>
+<li>Between Four-Of-A-Kind-Plus-Kicker, compare Rank of the Four-Of-A-Kind.
+<ul>
+<li>Kicker’s Rank is disregarded.</li>
+</ul>
+</li>
+<li>Between Straigh-Flushes, compare the highest card in each (Rank first, then Suit).</li>
+</ul>
+</li>
+</ul>
+<h3 id="current-game-limitations-ie-todos"><a href="#current-game-limitations-ie-todos">Current Game Limitations (i.e. TODOs)</a></h3>
+<ul>
+<li>Only supports Lone, Pairs, and Trips
+<ul>
+<li>Need to implement Fivers: Straight, Flush, FourPlusKick, StraightFlush</li>
+<li>Need to implement Bombs</li>
+</ul>
+</li>
+<li>NPC AI only plays Lone, will pass on Pairs and Trips
+<ul>
+<li>Need to implement AI that can play on anything </li>
+</ul>
+</li>
+<li>Currently only Single-Player
+<ul>
+<li>Need to implement Local Multiplayer (pass the keyboard style).</li>
+<li>Need to implement Cloud Multiplayer (“jackbox style”, room with a code).</li>
+</ul>
+</li>
+</ul>
+<p>Represents a Standard-52 Playing Card.</p>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="rank/index.html" title="bigtwo::card::rank mod">rank</a></div><div class="item-right docblock-short"><p>Represents the “number” on a Standard-52 card, ordered.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="suit/index.html" title="bigtwo::card::suit mod">suit</a></div><div class="item-right docblock-short"><p>Represents the suit on a Standard-52 card, ordered.</p>
+</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Card.html" title="bigtwo::card::Card struct">Card</a></div><div class="item-right docblock-short"><p>Represents a Standard-52 Playing Card.
+Composed of a Rank and a Suit, with Rank taking precedence over Suit.</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.ParseCardError.html" title="bigtwo::card::ParseCardError enum">ParseCardError</a></div><div class="item-right docblock-short"><p>Represents the possible errors from attempting to parse a Card from a string.</p>
+</div></div></div><h2 id="constants" class="small-section-header"><a href="#constants">Constants</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.THREE_OF_CLUBS.html" title="bigtwo::card::THREE_OF_CLUBS constant">THREE_OF_CLUBS</a></div><div class="item-right docblock-short"><p>The Card that starts every game, we use this constant to conveniently identify it.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="bigtwo" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>

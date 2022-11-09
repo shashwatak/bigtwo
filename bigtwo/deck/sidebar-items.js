@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Deck","Represents a full 52 Card Deck of Standard Playing Cards"]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PlayHandError","Represents the different ways a Player’s attempted Hand is not playable"]],"fn":[["check_player_can_play_hand","Checks if a specified Player can actually play the Hand they are attempting to play. Returns () if the Hand is playable, otherwise returns a specific PlayHandError."]]};

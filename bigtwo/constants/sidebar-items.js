@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["NUM_PLAYERS","There are many variations of this game with non-4 numbers of players, but for now we focus on the base game."]]};

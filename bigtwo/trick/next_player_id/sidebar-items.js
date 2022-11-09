@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["next_player_id","Identifies the Player who is up next."]]};

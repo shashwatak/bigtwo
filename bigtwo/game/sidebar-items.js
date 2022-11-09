@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["find_player_with_three_of_clubs","Used to identify the player who was dealt the Three Of Clubs. The game can only begin with the player that has the Three of Clubs."],["perform_game","Run the entire Game Loop."],["shuffle_and_deal_cards","Shuffle and Deal the cards just like a regular human dealer. All players will receive 13 Cards each."]]};
