@@ -32,7 +32,7 @@ jobs:
     - name: Generate Docs
       run: cargo doc --verbose
     - name: Make Index HTML
-      run: echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
+      run: echo "<meta http-equiv=\"refresh\" content=\"0; url=index.html\">" > target/doc/index.html
     - name: Upload Docs as Artifact
       uses:  actions/upload-pages-artifact@v1
       with:
