@@ -36,6 +36,6 @@ jobs:
       with:
         input: target/doc/
     - name: Deploy Docs Artifact to Github Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      id: deployment
+      uses: actions/deploy-pages@v1
 
