@@ -34,7 +34,7 @@ jobs:
     - name: Upload Docs as Artifact
       uses:  actions/upload-pages-artifact@v1
       with:
-        input: target/doc/
+        path: target/doc/
     - name: Deploy Docs Artifact to Github Pages
       id: deployment
       uses: actions/deploy-pages@v1
