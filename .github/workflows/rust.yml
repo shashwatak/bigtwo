@@ -32,7 +32,7 @@ jobs:
     - name: Generate Docs
       run: cargo doc --verbose
     - name: Upload Docs as Artifact
-      uses:  actions/upload-pages-artifact 
+      uses:  actions/upload-pages-artifact@v1
       with:
         input: target/doc/
     - name: Deploy Docs Artifact to Github Pages
