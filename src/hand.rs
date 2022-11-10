@@ -3,6 +3,7 @@
 
 use core::fmt;
 use std::collections::BTreeSet;
+use std::ops::Index;
 use std::str::FromStr;
 
 use crate::card::Card;
@@ -161,6 +162,51 @@ impl Hand {
     }
 }
 
+impl Index<usize> for Hand {
+    type Output = Card;
+
+    #[inline(always)]
+    fn index(&self, index: usize) -> &Self::Output {
+        match self {
+            Hand::Lone(a) if index == 0 => a,
+            Hand::Pair(a, b) if index < 2 => [a, b][index],
+            Hand::Trips(a, b, c) if index < 3 => [a, b, c][index],
+            _ => panic!("index {index} is out of bounds!"),
+        }
+    }
+}
+
+pub struct HandIterator<'a> {
+    index: usize,
+    hand: &'a Hand,
+}
+
+impl<'a> HandIterator<'a> {
+    fn new(hand: &'a Hand) -> Self {
+        HandIterator { index: 0, hand }
+    }
+}
+
+impl<'a> Iterator for HandIterator<'a> {
+    type Item = &'a Card;
+    fn next(&mut self) -> Option<Self::Item> {
+        let idx = self.index;
+        self.index += 1;
+        match self.hand {
+            Hand::Lone(..) if idx == 0 => Some(&self.hand[idx]),
+            Hand::Pair(..) if idx < 2 => Some(&self.hand[idx]),
+            Hand::Trips(..) if idx < 3 => Some(&self.hand[idx]),
+            _ => None,
+        }
+    }
+}
+
+impl Hand {
+    pub fn cards(&self) -> HandIterator {
+        HandIterator::new(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -219,5 +265,38 @@ mod tests {
         assert!("2S 2D".parse::<Hand>().unwrap() > "AS AD".parse::<Hand>().unwrap());
         assert!("TS TD TC".parse::<Hand>().unwrap() < "TS TH TC".parse::<Hand>().unwrap());
         assert!("".parse::<Hand>().unwrap() > "2S 2H 2D".parse::<Hand>().unwrap());
+    }
+
+    use crate::card::rank::Rank;
+    use crate::card::suit::Suit;
+
+    #[test]
+    fn test_hand_index_iterator() {
+        let hand: Hand = "2S 2H 2D".parse().unwrap();
+        assert_eq!(
+            hand[0],
+            Card {
+                rank: Rank::Two,
+                suit: Suit::Spades
+            }
+        );
+        assert_eq!(
+            hand[1],
+            Card {
+                rank: Rank::Two,
+                suit: Suit::Hearts
+            }
+        );
+        assert_eq!(
+            hand[2],
+            Card {
+                rank: Rank::Two,
+                suit: Suit::Diamonds
+            }
+        );
+
+        for (index, card) in hand.cards().enumerate() {
+            assert_eq!(hand[index], *card);
+        }
     }
 }
