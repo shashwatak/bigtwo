@@ -74,19 +74,7 @@ impl Player {
     /// played them legally).
     pub fn remove_hand_from_cards(&mut self, hand: &Hand) {
         assert!(self.has_cards(hand));
-        match hand {
-            Hand::Lone(a) => self.remove_cards_from_cards(&[*a]),
-            Hand::Pair(a, b) => self.remove_cards_from_cards(&[*a, *b]),
-            Hand::Trips(a, b, c) => self.remove_cards_from_cards(&[*a, *b, *c]),
-            _ => unreachable!(),
-        }
-    }
-
-    /// Used internally to remove any slice of cards from a Player's cards.
-    /// # Panics
-    /// - Will panic if any of cards_to_remove are not in Player's cards.
-    fn remove_cards_from_cards(&mut self, cards_to_remove: &[Card]) {
-        for to_remove in cards_to_remove {
+        for to_remove in hand.cards() {
             let index = self
                 .cards
                 .iter()
@@ -98,20 +86,10 @@ impl Player {
 
     /// Used to make sure the Player actually has the cards they tried to play.
     pub fn has_cards(&self, hand: &Hand) -> bool {
-        Player::hand_in_cards(hand, &self.cards)
+        let cards: BTreeSet<&Card> = BTreeSet::from_iter(&self.cards);
+        hand.cards().all(|card| cards.contains(card))
     }
 
-    /// Used internally, converts players cards into BTreeSet to check if cards from hand are
-    /// present.
-    fn hand_in_cards(hand: &Hand, cards: &[Card]) -> bool {
-        let cards: BTreeSet<&Card> = BTreeSet::from_iter(cards);
-        match hand {
-            Hand::Lone(a) => cards.contains(a),
-            Hand::Pair(a, b) => cards.contains(a) && cards.contains(b),
-            Hand::Trips(a, b, c) => cards.contains(a) && cards.contains(b) && cards.contains(c),
-            Hand::Pass => true,
-        }
-    }
 }
 
 #[cfg(test)]
