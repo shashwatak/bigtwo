@@ -76,5 +76,30 @@ mod tests {
         assert!(
             matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,)
         );
+
+        const expected_cards: [Card; 5] = [
+            Card {
+                rank: Rank::Seven,
+                suit: Suit::Clubs,
+            },
+            Card {
+                rank: Rank::Six,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Five,
+                suit: Suit::Hearts,
+            },
+            Card {
+                rank: Rank::Four,
+                suit: Suit::Diamonds,
+            },
+            THREE_OF_SPADES,
+        ];
+        let mut input = "3G\n3S 4D\n7C 6D 5H 4D 3S".as_bytes();
+        let hand = get_user_input(&mut input);
+        for (idx, card) in hand.cards().enumerate() {
+            assert_eq!(*card, expected_cards[idx]);
+        }
     }
 }

@@ -8,22 +8,22 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub enum PlayHandError {
     /// Attempted Hand must be the same number of cards as previous played Hand.
-    Match,
+    NotMatching,
 
     /// Highest card of attempted Hand must be higher than the highest card of the previously
     /// played Hand.
-    HighEnough,
+    TooLow,
 
     /// Attempted Hand has cards not found in the player's cards.
-    PlayerCards,
+    StolenCards,
 }
 
 impl Display for PlayHandError {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
-            Self::Match => write!(f, "wrong number of cards"),
-            Self::HighEnough => write!(f, "highest is not high enough"),
-            Self::PlayerCards => write!(f, "these cards are not in the players hand"),
+            Self::NotMatching => write!(f, "wrong number of cards"),
+            Self::TooLow => write!(f, "highest is not high enough"),
+            Self::StolenCards => write!(f, "these cards are not in the players hand"),
         }
     }
 }
@@ -36,15 +36,15 @@ pub fn check_player_can_play_hand(
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
     if !Hand::is_same_type(current, attempt) {
-        return Err(PlayHandError::Match);
+        return Err(PlayHandError::NotMatching);
     }
 
     if current > attempt {
-        return Err(PlayHandError::HighEnough);
+        return Err(PlayHandError::TooLow);
     }
 
     if !player.has_cards(attempt) {
-        return Err(PlayHandError::PlayerCards);
+        return Err(PlayHandError::StolenCards);
     }
 
     Ok(())
@@ -77,21 +77,52 @@ mod tests {
         // incorrectly plays a Three of Diamonds, reject
         let hand: Hand = "3D".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::HighEnough)));
+        assert!(matches!(res, Err(PlayHandError::TooLow)));
 
         // incorrectly plays a Pair of Fours, reject
         let hand: Hand = "4H 4D".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::Match)));
+        assert!(matches!(res, Err(PlayHandError::NotMatching)));
 
         // incorrectly plays cards they don't have
         let hand: Hand = "2S".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::PlayerCards)));
+        assert!(matches!(res, Err(PlayHandError::StolenCards)));
 
         // passes
         let hand: Hand = "".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
         assert!(matches!(res, Ok(_)));
+    }
+
+    #[test]
+    fn test_five_card_hands(){
+        let mut player = Player::default();
+        let hand_to_beat: Hand = "7D 6H 5C 4H 3D".parse().unwrap();
+
+        // loses
+        let cards = vec_card_from_str("7C 6D 5H 4D 3S");
+        let hand = Hand::try_from_cards(&cards[..]).unwrap();
+        player.cards = cards;
+        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
+        assert!(matches!(res, Err(PlayHandError::TooLow)));
+
+        // wins
+        let cards = vec_card_from_str("7S 6D 5H 4D 3S");
+        let hand = Hand::try_from_cards(&cards[..]).unwrap();
+        player.cards = cards;
+        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
+        assert!(matches!(res, Ok(_)));
+
+        // ensure that lones, pairs, and trips cannot play on fivers
+        let not_matching_hands = ["2S", "2S 2H", "2S 2H 2D"];
+            let cards = vec_card_from_str("2S 2H 2D");
+        player.cards = cards;
+        for hand in not_matching_hands {
+            let hand : Hand = hand.parse().unwrap();
+            let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
+            assert!(matches!(res, Err(PlayHandError::NotMatching)));
+        }
+
     }
 }
