@@ -26,12 +26,13 @@ pub enum Hand {
 
 impl fmt::Display for Hand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Hand::Lone(a) => write!(f, "{}", a),
-            Hand::Pair(a, b) => write!(f, "{} {}", a, b),
-            Hand::Trips(a, b, c) => write!(f, "{} {} {}", a, b, c),
-            Hand::Pass => write!(f, ""),
+        let mut out: Vec<String> = vec![];
+        for card in self.cards() {
+            out.push(card.to_string());
         }
+        let out = out.join(" ");
+        let out = out.trim();
+        write!(f, "{}", out)
     }
 }
 
