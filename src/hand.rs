@@ -160,6 +160,7 @@ impl Hand {
                 | (Hand::Pair(_, _), Hand::Pair(_, _))
                 | (Hand::Trips(_, _, _), Hand::Trips(_, _, _))
         )
+        matches!(attempted, Hand::Pass) || previous.cards().len() == attempted.cards().len()
     }
 }
 
@@ -191,6 +192,7 @@ impl<'a> HandIterator<'a> {
 impl<'a> Iterator for HandIterator<'a> {
     type Item = &'a Card;
     fn next(&mut self) -> Option<Self::Item> {
+        // Uses the Index trait impl for Hand
         let idx = self.index;
         self.index += 1;
         match self.hand {
@@ -200,7 +202,17 @@ impl<'a> Iterator for HandIterator<'a> {
             _ => None,
         }
     }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        match self.hand {
+            Hand::Pass => (0, Some(0)),
+            Hand::Lone(..) => (1 - self.index, Some(1 - self.index)),
+            Hand::Pair(..) => (2 - self.index, Some(2 - self.index)),
+            Hand::Trips(..) => (3 - self.index, Some(3 - self.index)),
+        }
+    }
 }
+
+impl<'a> ExactSizeIterator for HandIterator<'a> {}
 
 impl Hand {
     pub fn cards(&self) -> HandIterator {
