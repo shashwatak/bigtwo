@@ -77,7 +77,7 @@ mod tests {
             matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,)
         );
 
-        const expected_cards: [Card; 5] = [
+        let expected_cards: [Card; 5] = [
             Card {
                 rank: Rank::Seven,
                 suit: Suit::Clubs,
