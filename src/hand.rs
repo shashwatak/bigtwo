@@ -22,6 +22,8 @@ pub enum Hand {
     Trips(Card, Card, Card),
     /// 5 Cards with consecutive Rank
     Straight(Card, Card, Card, Card, Card),
+    /// 5 Cards of the same Suit
+    Flush(Card, Card, Card, Card, Card),
     /// No Hand, No Cards
     Pass,
 }
@@ -125,7 +127,9 @@ impl Hand {
         assert!(third < second);
         assert!(second < first);
 
-        if Hand::check_straight(&first, &second, &third, &fourth, &fifth) {
+        if Hand::check_flush(&first, &second, &third, &fourth, &fifth) {
+            Ok(Hand::Flush(first, second, third, fourth, fifth))
+        } else if Hand::check_straight(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::Straight(first, second, third, fourth, fifth))
         } else {
             Err(InvalidHandError::NotAFiveCardHand)
@@ -144,6 +148,14 @@ impl Hand {
             && second.rank as usize == third.rank as usize + 1
             && third.rank as usize == fourth.rank as usize + 1
             && fourth.rank as usize == fifth.rank as usize + 1
+    }
+
+    /// Returns true if the all five cards have the same suit.
+    fn check_flush(first: &Card, second: &Card, third: &Card, fourth: &Card, fifth: &Card) -> bool {
+        first.suit == second.suit
+            && second.suit == third.suit
+            && third.suit == fourth.suit
+            && fourth.suit == fifth.suit
     }
 
     /// Return an Error if this slice of Cards is incoherent.
@@ -203,11 +215,13 @@ impl Index<usize> for Hand {
         match self {
             // This code is a bit tedious, but it is simple and it allows us to impl the Iterator
             // and ExactSizeIterator traits.
-            // NOTE: If we tried to use the Hand iterator here, it would cause an infinite recursion.
+            // NOTE: If we tried to use the Hand Iterator here, it would cause an infinite recursion.
             Hand::Lone(a) if index == 0 => a,
             Hand::Pair(a, b) if index < 2 => [a, b][index],
             Hand::Trips(a, b, c) if index < 3 => [a, b, c][index],
-            Hand::Straight(a, b, c, d, e) if index < 5 => [a, b, c, d, e][index],
+            Hand::Straight(a, b, c, d, e) | Hand::Flush(a, b, c, d, e) if index < 5 => {
+                [a, b, c, d, e][index]
+            }
             _ => panic!("index {index} is out of bounds!"),
         }
     }
@@ -234,7 +248,7 @@ impl<'a> Iterator for HandIterator<'a> {
             Hand::Lone(..) if idx == 0 => Some(&self.hand[idx]),
             Hand::Pair(..) if idx < 2 => Some(&self.hand[idx]),
             Hand::Trips(..) if idx < 3 => Some(&self.hand[idx]),
-            Hand::Straight(..) if idx < 5 => Some(&self.hand[idx]),
+            Hand::Straight(..) | Hand::Flush(..) if idx < 5 => Some(&self.hand[idx]),
             _ => None,
         }
     }
@@ -244,7 +258,7 @@ impl<'a> Iterator for HandIterator<'a> {
             Hand::Lone(..) => (1 - self.index, Some(1 - self.index)),
             Hand::Pair(..) => (2 - self.index, Some(2 - self.index)),
             Hand::Trips(..) => (3 - self.index, Some(3 - self.index)),
-            Hand::Straight(..) => (5 - self.index, Some(5 - self.index)),
+            _ => (5 - self.index, Some(5 - self.index)),
         }
     }
 }
@@ -307,7 +321,7 @@ mod tests {
 
     #[test]
     fn test_good_hand_to_from_string() {
-        let good_hands = ["", "2S", "3D 3C", "KS KH KC", "8S 7D 6S 5C 4C"];
+        let good_hands = ["", "2S", "3D 3C", "KS KH KC", "8S 7D 6S 5C 4C", "AD TD 5D 4D 3D"];
         for expected_hand in good_hands {
             let hand = expected_hand.to_string().parse::<Hand>();
             println!("{:?}", hand);

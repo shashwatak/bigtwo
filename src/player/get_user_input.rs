@@ -101,5 +101,33 @@ mod tests {
         for (idx, card) in hand.cards().enumerate() {
             assert_eq!(*card, expected_cards[idx]);
         }
+
+        let expected_cards: [Card; 5] = [
+            Card {
+                rank: Rank::Ten,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Eight,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Six,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Four,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Three,
+                suit: Suit::Diamonds,
+            },
+        ];
+        let mut input = "3G\n3S 4D\nTD 8D 6D 4D 3D".as_bytes();
+        let hand = get_user_input(&mut input);
+        for (idx, card) in hand.cards().enumerate() {
+            assert_eq!(*card, expected_cards[idx]);
+        }
     }
 }
