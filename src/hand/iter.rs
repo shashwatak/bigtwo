@@ -1,7 +1,7 @@
 //! Implements Index, Iterator, and ExactSizeIterator for Hand
 
-use crate::hand::Hand;
 use crate::card::Card;
+use crate::hand::Hand;
 
 use std::ops::Index;
 
@@ -16,7 +16,11 @@ impl Index<usize> for Hand {
             Hand::Lone(a) if index == 0 => a,
             Hand::Pair(a, b) if index < 2 => [a, b][index],
             Hand::Trips(a, b, c) if index < 3 => [a, b, c][index],
-            Hand::Straight(a, b, c, d, e) | Hand::Flush(a, b, c, d, e) if index < 5 => {
+            Hand::Straight(a, b, c, d, e)
+            | Hand::Flush(a, b, c, d, e)
+            | Hand::FullHouse(a, b, c, d, e)
+                if index < 5 =>
+            {
                 [a, b, c, d, e][index]
             }
             _ => panic!("index {index} is out of bounds!"),
@@ -45,7 +49,7 @@ impl<'a> Iterator for HandIterator<'a> {
             Hand::Lone(..) if idx == 0 => Some(&self.hand[idx]),
             Hand::Pair(..) if idx < 2 => Some(&self.hand[idx]),
             Hand::Trips(..) if idx < 3 => Some(&self.hand[idx]),
-            Hand::Straight(..) | Hand::Flush(..) if idx < 5 => Some(&self.hand[idx]),
+            Hand::Straight(..) | Hand::Flush(..) | Hand::FullHouse(..) if idx < 5 => Some(&self.hand[idx]),
             _ => None,
         }
     }
@@ -75,11 +79,11 @@ mod tests {
 
     #[test]
     fn test_index_and_iterator() {
-        let hand : Hand = "2S AS KS QS JS".parse().unwrap();
+        let hand: Hand = "2S AS KS QS JS".parse().unwrap();
         assert_eq!(hand.cards().len(), 5);
         let cards: Vec<&Card> = Vec::from_iter(hand.cards());
         for i in 0..5 {
-            assert_eq!(*cards[i], hand[i]); 
+            assert_eq!(*cards[i], hand[i]);
         }
     }
 }

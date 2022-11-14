@@ -25,6 +25,8 @@ pub enum Hand {
     Straight(Card, Card, Card, Card, Card),
     /// 5 Cards of the same Suit
     Flush(Card, Card, Card, Card, Card),
+    /// A Trip and a Pair
+    FullHouse(Card, Card, Card, Card, Card),
     /// No Hand, No Cards
     Pass,
 }

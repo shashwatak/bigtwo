@@ -4,9 +4,9 @@
 use std::collections::BTreeSet;
 use std::str::FromStr;
 
-use crate::hand::Hand;
 use crate::card::Card;
 use crate::card::ParseCardError;
+use crate::hand::Hand;
 
 /// Represents the possible ways that a string can fail to parse into a reasonable Hand.
 #[derive(Debug)]
@@ -62,22 +62,32 @@ impl Hand {
     /// Given two cards, return a Pair or an Error
     pub fn try_pair(first: Card, second: Card) -> Result<Hand, InvalidHandError> {
         assert!(second < first);
-        if first.rank == second.rank {
+        if Hand::check_pair(&first, &second) {
             Ok(Hand::Pair(first, second))
         } else {
             Err(InvalidHandError::UnmatchedPair)
         }
     }
 
+    /// Returns true if first and second make a valid Pair
+    fn check_pair(first: &Card, second: &Card) -> bool {
+        first.rank == second.rank
+    }
+
     /// Given three cards, return a Trip or an Error
     pub fn try_trips(first: Card, second: Card, third: Card) -> Result<Hand, InvalidHandError> {
         assert!(third < second);
         assert!(second < first);
-        if first.rank == second.rank && second.rank == third.rank {
+        if Hand::check_trips(&first, &second, &third) {
             Ok(Hand::Trips(first, second, third))
         } else {
             Err(InvalidHandError::UnmatchedTrips)
         }
+    }
+
+    /// Returns true if first, second, and third make a valid Trip
+    fn check_trips(first: &Card, second: &Card, third: &Card) -> bool {
+        first.rank == second.rank && second.rank == third.rank
     }
 
     /// Given five cards, return either a valid Hand or an error
@@ -93,7 +103,9 @@ impl Hand {
         assert!(third < second);
         assert!(second < first);
 
-        if Hand::check_flush(&first, &second, &third, &fourth, &fifth) {
+        if Hand::check_full_house(&first, &second, &third, &fourth, &fifth) {
+            Ok(Hand::FullHouse(first, second, third, fourth, fifth))
+        } else if Hand::check_flush(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::Flush(first, second, third, fourth, fifth))
         } else if Hand::check_straight(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::Straight(first, second, third, fourth, fifth))
@@ -122,6 +134,18 @@ impl Hand {
             && second.suit == third.suit
             && third.suit == fourth.suit
             && fourth.suit == fifth.suit
+    }
+
+    /// Returns true if the five cards are composed of a Pair and Trip
+    fn check_full_house(
+        first: &Card,
+        second: &Card,
+        third: &Card,
+        fourth: &Card,
+        fifth: &Card,
+    ) -> bool {
+        (Hand::check_pair(first, second) && Hand::check_trips(third, fourth, fifth))
+            || (Hand::check_trips(first, second, third) && Hand::check_pair(fourth, fifth))
     }
 
     /// Return an Error if this slice of Cards is incoherent.
@@ -166,7 +190,6 @@ impl FromStr for Hand {
         Self::try_from_cards(&cards)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -218,13 +241,26 @@ mod tests {
 
     #[test]
     fn test_good_hand_to_from_string() {
-        let good_hands = ["", "2S", "3D 3C", "KS KH KC", "8S 7D 6S 5C 4C", "AD TD 5D 4D 3D"];
+        let good_hands = [
+            "",
+            "2S",
+            "3D 3C",
+            "KS KH KC",
+            "8S 7D 6S 5C 4C",
+            "AD TD 5D 4D 3D",
+            "2S 2D 7S 7D 7C",
+            "7S 7D 7C 4H 4D",
+        ];
         for expected_hand in good_hands {
+            println!("AAAAAAA: {expected_hand}");
             let hand = expected_hand.to_string().parse::<Hand>();
+            println!("debug hand {hand:?}");
             assert!(matches!(hand, Ok(_)));
-            let result_hand = hand.unwrap().to_string();
+            let result_hand = hand.unwrap();
+            println!("result hand {result_hand:?}");
+            let result_hand = result_hand.to_string();
+            println!("result string {result_hand}");
             assert_eq!(expected_hand, result_hand);
         }
     }
-
 }
