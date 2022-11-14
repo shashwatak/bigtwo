@@ -1,5 +1,5 @@
 //! Checks if a specified Player can actually play the Hand they are attempting to play.
-use crate::hand::Hand;
+use crate::hand::{Hand, order::order};
 use crate::player::Player;
 
 use std::fmt::{Display, Formatter};
@@ -35,19 +35,28 @@ pub fn check_player_can_play_hand(
     player: &Player,
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
-    if !Hand::is_same_type(current, attempt) {
-        return Err(PlayHandError::NotMatching);
+    assert!(!matches!(current, Hand::Pass), "the current hand of the trick should never be Pass");
+
+    // attempt is always allowed to be pass
+    if matches!(attempt, Hand::Pass) {
+        return Ok(());
     }
 
-    if current > attempt {
-        return Err(PlayHandError::TooLow);
-    }
-
+    // player may only play cards they possess
     if !player.has_cards(attempt) {
         return Err(PlayHandError::StolenCards);
     }
 
-    Ok(())
+
+    // use non-derived custom order to decide if Hand is playable
+    let ordering = order(current, attempt);
+    println!("{ordering:?}");
+    match ordering {
+        Some(std::cmp::Ordering::Greater) => Err(PlayHandError::TooLow),
+        None => Err(PlayHandError::NotMatching),
+        _ => Ok(()),
+    }
+
 }
 
 #[cfg(test)]
@@ -62,7 +71,7 @@ mod tests {
         let hand_to_beat = "3C".parse().unwrap();
 
         // player has a few cards
-        let cards = vec_card_from_str("3C 3S 4H 4D 4S");
+        let cards = vec_card_from_str("3D 3S 4H 4D 4S");
         let mut player = Player::default();
         player.cards = cards;
 

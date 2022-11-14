@@ -4,6 +4,7 @@
 
 pub mod iter;
 pub mod try_from;
+pub mod order;
 
 use core::fmt;
 
@@ -40,26 +41,3 @@ impl fmt::Display for Hand {
     }
 }
 
-
-impl Hand {
-    /// Returns true when both provided Hands are the same variant.
-    pub fn is_same_type(previous: &Hand, attempted: &Hand) -> bool {
-        matches!(attempted, Hand::Pass) || previous.cards().len() == attempted.cards().len()
-    }
-}
-
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-
-    #[test]
-    fn test_hand_order() {
-        assert!("2S".parse::<Hand>().unwrap() > "2D".parse::<Hand>().unwrap());
-        assert!("2S 2D".parse::<Hand>().unwrap() > "AS AD".parse::<Hand>().unwrap());
-        assert!("TS TD TC".parse::<Hand>().unwrap() < "TS TH TC".parse::<Hand>().unwrap());
-        assert!("".parse::<Hand>().unwrap() > "2S 2H 2D".parse::<Hand>().unwrap());
-    }
-
-}
