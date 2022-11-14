@@ -1,3 +1,5 @@
+//! implements FromString for Hand, as well as helper function try_from_cards for making
+//! valid hands out of Vec<Card> and &[Card]
 
 use std::collections::BTreeSet;
 use std::str::FromStr;
@@ -26,8 +28,6 @@ impl From<ParseCardError> for ParseHandError {
 }
 
 /// Represents the ways valid Cards can fail to combine into a valid Hand.
-/// TODO: represent invalid 5 card hands
-/// TODO 2: this might actually be kinda redundant, could just remove it?
 #[derive(Debug)]
 pub enum InvalidHandError {
     /// Two cards of different Rank
