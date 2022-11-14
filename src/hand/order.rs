@@ -34,29 +34,38 @@ mod tests {
 
     #[test]
     fn test_check_hand_order() {
+        // trivial match, Pass equals Pass
         assert!(matches!(
             order(&"".parse().unwrap(), &"".parse().unwrap()),
             Some(Ordering::Equal)
         ));
 
+        // Single Comparisons
         assert!(matches!(
             order(&"3C".parse().unwrap(), &"3D".parse().unwrap()),
             Some(Ordering::Less)
         ));
-
         assert!(matches!(
             order(&"3D".parse().unwrap(), &"3C".parse().unwrap()),
             Some(Ordering::Greater)
         ));
 
+        // Pair doesn't match Single
         assert!(matches!(
             order(&"4S 4D".parse().unwrap(), &"3D".parse().unwrap()),
             None
         ));
 
+        // Flush beats Straight
         assert!(matches!(
             order(&"TC 8C 7C 5C 4C".parse().unwrap(), &"2S AS KC QC JS".parse().unwrap()), 
             Some(Ordering::Greater)
+        ));
+
+        // Flush does not match Trip
+        assert!(matches!(
+            order(&"TC 8C 7C 5C 4C".parse().unwrap(), &"2S 2D 2C".parse().unwrap()), 
+            None
         ));
 
     }
