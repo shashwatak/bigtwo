@@ -147,9 +147,9 @@ mod tests {
     }
 
     #[test]
-    fn test_full_house_major() {
+    fn test_full_house_order() {
         let a: Hand = "8S 8D 8C 4H 4D".parse().unwrap();
         let b: Hand = "2S 2D 7S 7D 7C".parse().unwrap();
-        assert!(a > b);
+        assert!(matches!(order_full_house(&a, &b), Ordering::Greater));
     }
 }
