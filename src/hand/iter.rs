@@ -1,12 +1,9 @@
 //! Implements Index, Iterator, and ExactSizeIterator for Hand
 
-
 use crate::hand::Hand;
 use crate::card::Card;
 
 use std::ops::Index;
-
-
 
 impl Index<usize> for Hand {
     type Output = Card;
@@ -75,18 +72,14 @@ impl Hand {
 mod tests {
 
     use super::*;
-    use crate::card::rank::Rank;
-    use crate::card::suit::Suit;
 
     #[test]
     fn test_index_and_iterator() {
         let hand : Hand = "2S AS KS QS JS".parse().unwrap();
         assert_eq!(hand.cards().len(), 5);
         let cards: Vec<&Card> = Vec::from_iter(hand.cards());
-        assert_eq!(*cards[0], Card { rank: Rank::Two, suit: Suit::Spades });
-        assert_eq!(*cards[1], Card { rank: Rank::Ace, suit: Suit::Spades });
-        assert_eq!(*cards[2], Card { rank: Rank::King, suit: Suit::Spades });
-        assert_eq!(*cards[3], Card { rank: Rank::Queen, suit: Suit::Spades });
-        assert_eq!(*cards[4], Card { rank: Rank::Jack, suit: Suit::Spades });
+        for i in 0..5 {
+            assert_eq!(*cards[i], hand[i]); 
+        }
     }
 }
