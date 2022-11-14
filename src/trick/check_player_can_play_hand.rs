@@ -140,8 +140,15 @@ mod tests {
         assert!(matches!(res, Ok(_)));
 
         // ensure that straights don't beat flushes
-
         let hand_to_beat: Hand = "TC 8C 6C 5C 4C".parse().unwrap();
+        let cards = vec_card_from_str("2D AH KC QH JD");
+        let hand = Hand::try_from_cards(&cards[..]).unwrap();
+        player.cards = cards;
+        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
+        assert!(matches!(res, Err(PlayHandError::TooLow)));
+
+        // ensure that straights don't beat Full Houses 
+        let hand_to_beat: Hand = "5S 5C 3S 3D 3C".parse().unwrap();
         let cards = vec_card_from_str("2D AH KC QH JD");
         let hand = Hand::try_from_cards(&cards[..]).unwrap();
         player.cards = cards;
