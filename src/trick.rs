@@ -96,12 +96,10 @@ impl Trick {
             loop {
                 assert_eq!(player.cards[0], THREE_OF_CLUBS);
                 let attempt = (player.start_game)(&player.cards);
-                match attempt {
-                    Hand::Trips(_, _, a) if a == THREE_OF_CLUBS => break attempt,
-                    Hand::Pair(_, a) if a == THREE_OF_CLUBS => break attempt,
-                    Hand::Lone(a) if a == THREE_OF_CLUBS => break attempt,
-                    _ => println!("Must play a hand that includes the Three of Clubs."),
+                if *attempt.cards().last().unwrap() == THREE_OF_CLUBS {
+                    break attempt
                 }
+                println!("Must play a hand that includes the Three of Clubs."); 
             }
         } else {
             loop {
