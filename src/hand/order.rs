@@ -37,7 +37,7 @@ pub fn order(current: &Hand, attempt: &Hand) -> Option<std::cmp::Ordering> {
     Some(current.cmp(attempt))
 }
 
-// Return an Ordering between 2 FullHouses
+/// Return an Ordering between 2 FullHouses
 fn order_full_house(current: &Hand, attempt: &Hand) -> std::cmp::Ordering {
     assert!(matches!(current, Hand::FullHouse(..)));
     assert!(matches!(attempt, Hand::FullHouse(..)));
