@@ -221,7 +221,6 @@ mod tests {
         let good_hands = ["", "2S", "3D 3C", "KS KH KC", "8S 7D 6S 5C 4C", "AD TD 5D 4D 3D"];
         for expected_hand in good_hands {
             let hand = expected_hand.to_string().parse::<Hand>();
-            println!("{:?}", hand);
             assert!(matches!(hand, Ok(_)));
             let result_hand = hand.unwrap().to_string();
             assert_eq!(expected_hand, result_hand);

@@ -47,10 +47,8 @@ pub fn check_player_can_play_hand(
         return Err(PlayHandError::StolenCards);
     }
 
-
     // use non-derived custom order to decide if Hand is playable
     let ordering = order(current, attempt);
-    println!("{ordering:?}");
     match ordering {
         Some(std::cmp::Ordering::Greater) => Err(PlayHandError::TooLow),
         None => Err(PlayHandError::NotMatching),
