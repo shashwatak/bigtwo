@@ -19,6 +19,7 @@ impl Index<usize> for Hand {
             Hand::Straight(a, b, c, d, e)
             | Hand::Flush(a, b, c, d, e)
             | Hand::FullHouse(a, b, c, d, e)
+            | Hand::FourPlusKick(a, b, c, d, e)
                 if index < 5 =>
             {
                 [a, b, c, d, e][index]
@@ -41,6 +42,7 @@ impl<'a> HandIterator<'a> {
 
 impl<'a> Iterator for HandIterator<'a> {
     type Item = &'a Card;
+
     fn next(&mut self) -> Option<Self::Item> {
         // Uses the Index trait impl for Hand
         let idx = self.index;
@@ -49,10 +51,11 @@ impl<'a> Iterator for HandIterator<'a> {
             Hand::Lone(..) if idx == 0 => Some(&self.hand[idx]),
             Hand::Pair(..) if idx < 2 => Some(&self.hand[idx]),
             Hand::Trips(..) if idx < 3 => Some(&self.hand[idx]),
-            Hand::Straight(..) | Hand::Flush(..) | Hand::FullHouse(..) if idx < 5 => Some(&self.hand[idx]),
+            Hand::Straight(..) | Hand::Flush(..) | Hand::FullHouse(..) | Hand::FourPlusKick(..) if idx < 5 => Some(&self.hand[idx]),
             _ => None,
         }
     }
+
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self.hand {
             Hand::Pass => (0, Some(0)),

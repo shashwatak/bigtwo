@@ -35,7 +35,6 @@ pub fn check_player_can_play_hand(
     player: &Player,
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
-    assert!(!matches!(current, Hand::Pass), "the current hand of the trick should never be Pass");
 
     // attempt is always allowed to be pass
     if matches!(attempt, Hand::Pass) {
@@ -149,6 +148,14 @@ mod tests {
 
         // ensure that straights don't beat Full Houses 
         let hand_to_beat: Hand = "5S 5C 3S 3D 3C".parse().unwrap();
+        let cards = vec_card_from_str("2D AH KC QH JD");
+        let hand = Hand::try_from_cards(&cards[..]).unwrap();
+        player.cards = cards;
+        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
+        assert!(matches!(res, Err(PlayHandError::TooLow)));
+
+        // ensure that FourPlusKick beats FullHouse 
+        let hand_to_beat: Hand = "2S 2H 5H 5D 5C".parse().unwrap();
         let cards = vec_card_from_str("2D AH KC QH JD");
         let hand = Hand::try_from_cards(&cards[..]).unwrap();
         player.cards = cards;

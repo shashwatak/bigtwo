@@ -98,12 +98,15 @@ impl Hand {
         fourth: Card,
         fifth: Card,
     ) -> Result<Hand, InvalidHandError> {
+
         assert!(fifth < fourth);
         assert!(fourth < third);
         assert!(third < second);
         assert!(second < first);
 
-        if Hand::check_full_house(&first, &second, &third, &fourth, &fifth) {
+        if Hand::check_four_plus_kick(&first, &second, &third, &fourth, &fifth) {
+            Ok(Hand::FourPlusKick(first, second, third, fourth, fifth))
+        } else if Hand::check_full_house(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::FullHouse(first, second, third, fourth, fifth))
         } else if Hand::check_flush(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::Flush(first, second, third, fourth, fifth))
@@ -148,6 +151,16 @@ impl Hand {
             || (Hand::check_trips(first, second, third) && Hand::check_pair(fourth, fifth))
     }
 
+    /// Returns true if the four cards are composed of a Quad and a Kicker
+    fn check_four_plus_kick(
+        first: &Card,
+        second: &Card,
+        _: &Card,
+        fourth: &Card,
+        fifth: &Card,
+    ) -> bool {
+        first.rank == fourth.rank || second.rank == fifth.rank
+    }
     /// Return an Error if this slice of Cards is incoherent.
     pub fn sanitize_cards(cards: &[Card]) -> Result<(), ParseHandError> {
         let mut unique_cards: BTreeSet<&Card> = BTreeSet::new();
@@ -250,6 +263,8 @@ mod tests {
             "AD TD 5D 4D 3D",
             "2S 2D 7S 7D 7C",
             "7S 7D 7C 4H 4D",
+            "2S 5S 5H 5D 5C",
+            "AS AH AD AC TS",
         ];
         for expected_hand in good_hands {
             println!("AAAAAAA: {expected_hand}");

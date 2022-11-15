@@ -27,6 +27,8 @@ pub enum Hand {
     Flush(Card, Card, Card, Card, Card),
     /// A Trip and a Pair
     FullHouse(Card, Card, Card, Card, Card),
+    /// All Four of one Rank, plus any other card
+    FourPlusKick(Card, Card, Card, Card, Card),
     /// No Hand, No Cards
     Pass,
 }

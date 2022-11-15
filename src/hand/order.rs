@@ -1,28 +1,34 @@
 //! defines Hand precendece, i.e. which Hand may be played atop which other Hand
 
+use crate::card::Card;
 use crate::hand::Hand;
 
 /// We want to keep the derived PartialOrd and Ord for Hand, but we cannot
 /// use that for the actual game logic as there are many exceptions.
+/// The derived PartialOrd and Ord works in many cases, but there are some exceptions:
+///  - Some Hand variants cannot be compared to different variants
+///      - Lones only with Lones, Pairs only with Pairs, and Trips only with Trips
+///  - Some Hand variants, two of this variant cannot be compared by Cards in descending order
+///      - A FullHouse always looks either like:
+///          - AAABB
+///          - AABBB
+///        Though A may have higher Rank, we use the Trip to decide order, which might be B.
+///      - The same is true of FourPlusKick, it is either:
+///          - AAAAB
+///          - ABBBB
+///        Though A may have higher Rank, we use the Quad to decide order, which might be B.
 pub fn order(current: &Hand, attempt: &Hand) -> Option<std::cmp::Ordering> {
-    // The derived PartialOrd works in many cases, but there are some exceptions:
-    //  - Some Hand variants cannot be compared to different variants
-    //      - Lones only with Lones, Pairs only with Pairs, and Trips only with Trips
-    //  - Some Hand variants cannot be compared by Cards in descending order
-    //      - A FullHouse always looks either like:
-    //          - AAABB
-    //          - AABBB
-    //        Though A may have higher Rank, we use the Trip to decide order, which might be B.
-    //      - The same is true of FourPlusKick, it is either:
-    //          - AAAAB
-    //          - ABBBB
-    //        Though A may have higher Rank, we use the Quad to decide order, which might be B.
-
+    // std::mem::discriminant is a stable way to identify enum variants
     // if both current and attempt are the same variant of Hand
     if std::mem::discriminant(current) == std::mem::discriminant(attempt) {
-        // FullHouses and FourPlusKick cannot be matched using derived PartialOrd
+        // FullHouses and FourPlusKick cannot be matched using derived Ord or PartialOrd
         if matches!(current, Hand::FullHouse(..)) {
-            return Some(order_full_house(current, attempt));
+            Some(order_full_house(current, attempt))
+        } else if matches!(current, Hand::FourPlusKick(..)) {
+            Some(order_four_plus_kick(current, attempt))
+        } else {
+            // Besides FullHouse and FourPlusKick, two of the same variant can be compared using derived Ord
+            Some(current.cmp(attempt))
         }
     }
     // if both current and attempt are different variants,
@@ -30,11 +36,53 @@ pub fn order(current: &Hand, attempt: &Hand) -> Option<std::cmp::Ordering> {
     else if matches!(current, Hand::Lone(..) | Hand::Pair(..) | Hand::Trips(..))
         || matches!(attempt, Hand::Lone(..) | Hand::Pair(..) | Hand::Trips(..))
     {
-        return None;
+        None
+    } else {
+        // use derived Ord for the rest
+        Some(current.cmp(attempt))
     }
+}
 
-    // use derived Ord for the rest
-    Some(current.cmp(attempt))
+/// Return an Ordering between 2 FourPlusKick
+fn order_four_plus_kick(current: &Hand, attempt: &Hand) -> std::cmp::Ordering {
+    assert!(matches!(current, Hand::FourPlusKick(..)));
+    assert!(matches!(attempt, Hand::FourPlusKick(..)));
+
+    let a = get_fours_major(current);
+    let b = get_fours_major(attempt);
+    if a != b {
+        return a.cmp(&b);
+    }
+    let a = get_fours_minor(current);
+    let b = get_fours_minor(attempt);
+    a.cmp(&b)
+}
+
+/// Copy the Card that is the highest card in the Four-Of-A-Kind component of a
+/// FourPlusKick
+fn get_fours_major(four_plus_kick: &Hand) -> Card {
+    assert!(matches!(four_plus_kick, Hand::FourPlusKick(..)));
+
+    // if the first and secoond cards match, first card is the biggest of
+    // the four-of-a-kind
+    if four_plus_kick[0].rank == four_plus_kick[1].rank {
+        four_plus_kick[0]
+    } else {
+        four_plus_kick[1]
+    }
+}
+
+/// Copy the Card that is the Kicker component of FourPlusKick
+fn get_fours_minor(four_plus_kick: &Hand) -> Card {
+    assert!(matches!(four_plus_kick, Hand::FourPlusKick(..)));
+
+    // if the first and secoond cards match, fifth card is the kicker,
+    // otherwise its the first card
+    if four_plus_kick[0].rank == four_plus_kick[1].rank {
+        four_plus_kick[4]
+    } else {
+        four_plus_kick[0]
+    }
 }
 
 /// Return an Ordering between 2 FullHouses
@@ -151,5 +199,12 @@ mod tests {
         let a: Hand = "8S 8D 8C 4H 4D".parse().unwrap();
         let b: Hand = "2S 2D 7S 7D 7C".parse().unwrap();
         assert!(matches!(order_full_house(&a, &b), Ordering::Greater));
+    }
+
+    #[test]
+    fn test_four_plus_order() {
+        let a: Hand = "8S 8H 8D 8C 4H".parse().unwrap();
+        let b: Hand = "2S 7S 7H 7D 7C".parse().unwrap();
+        assert!(matches!(order_four_plus_kick(&a, &b), Ordering::Greater));
     }
 }
