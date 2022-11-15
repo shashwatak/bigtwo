@@ -96,19 +96,32 @@ impl Trick {
             loop {
                 assert_eq!(player.cards[0], THREE_OF_CLUBS);
                 let attempt = (player.start_game)(&player.cards);
-                if *attempt.cards().last().unwrap() == THREE_OF_CLUBS {
-                    break attempt
+                if let Err(e) = check_player_can_play_hand(&Hand::Pass, player, &attempt) { 
+                    println!("{}", e);
+                    continue;
                 }
-                println!("Must play a hand that includes the Three of Clubs."); 
-            }
-        } else {
-            loop {
-                let attempt = (player.start_trick)(&player.cards);
                 if let Hand::Pass = attempt {
                     println!("Starting Hand cannot be Pass.");
                     continue;
                 }
-                break attempt;
+                if *attempt.cards().last().unwrap() != THREE_OF_CLUBS {
+                    println!("Must play a hand that includes the Three of Clubs."); 
+                    continue
+                }
+                break attempt
+            }
+        } else {
+            loop {
+                let attempt = (player.start_trick)(&player.cards);
+                if let Err(e) = check_player_can_play_hand(&Hand::Pass, player, &attempt) { 
+                    println!("{}", e);
+                    continue;
+                }
+                if let Hand::Pass = attempt {
+                    println!("Starting Hand cannot be Pass.");
+                    continue;
+                }
+                break attempt
             }
         };
 
