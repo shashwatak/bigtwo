@@ -1,10 +1,9 @@
 //! Represents any one of the allowed combinations of cards (known as a "Hand").
 //! Cannot be used to represent an unrecognized / nonsensical combination.
 
-
 pub mod iter;
-pub mod try_from;
 pub mod order;
+pub mod try_from;
 
 use core::fmt;
 
@@ -44,4 +43,3 @@ impl fmt::Display for Hand {
         write!(f, "{}", out)
     }
 }
-

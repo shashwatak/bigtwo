@@ -1,5 +1,5 @@
 //! Checks if a specified Player can actually play the Hand they are attempting to play.
-use crate::hand::{Hand, order::order};
+use crate::hand::{order::order, Hand};
 use crate::player::Player;
 
 use std::fmt::{Display, Formatter};
@@ -35,7 +35,6 @@ pub fn check_player_can_play_hand(
     player: &Player,
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
-
     // player may only play cards they possess
     if !player.has_cards(attempt) {
         return Err(PlayHandError::StolenCards);
@@ -48,7 +47,6 @@ pub fn check_player_can_play_hand(
         None => Err(PlayHandError::NotMatching),
         _ => Ok(()),
     }
-
 }
 
 #[cfg(test)]
@@ -141,7 +139,7 @@ mod tests {
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::TooLow)));
 
-        // ensure that straights don't beat Full Houses 
+        // ensure that straights don't beat Full Houses
         let hand_to_beat: Hand = "5S 5C 3S 3D 3C".parse().unwrap();
         let cards = vec_card_from_str("2D AH KC QH JD");
         let hand = Hand::try_from_cards(&cards[..]).unwrap();
@@ -149,7 +147,7 @@ mod tests {
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
         assert!(matches!(res, Err(PlayHandError::TooLow)));
 
-        // ensure that FourPlusKick beats FullHouse 
+        // ensure that FourPlusKick beats FullHouse
         let hand_to_beat: Hand = "2S 2H 5H 5D 5C".parse().unwrap();
         let cards = vec_card_from_str("2D AH KC QH JD");
         let hand = Hand::try_from_cards(&cards[..]).unwrap();

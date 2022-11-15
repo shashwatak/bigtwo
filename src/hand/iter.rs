@@ -51,7 +51,11 @@ impl<'a> Iterator for HandIterator<'a> {
             Hand::Lone(..) if idx == 0 => Some(&self.hand[idx]),
             Hand::Pair(..) if idx < 2 => Some(&self.hand[idx]),
             Hand::Trips(..) if idx < 3 => Some(&self.hand[idx]),
-            Hand::Straight(..) | Hand::Flush(..) | Hand::FullHouse(..) | Hand::FourPlusKick(..) if idx < 5 => Some(&self.hand[idx]),
+            Hand::Straight(..) | Hand::Flush(..) | Hand::FullHouse(..) | Hand::FourPlusKick(..)
+                if idx < 5 =>
+            {
+                Some(&self.hand[idx])
+            }
             _ => None,
         }
     }

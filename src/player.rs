@@ -89,7 +89,6 @@ impl Player {
         let cards: BTreeSet<&Card> = BTreeSet::from_iter(&self.cards);
         hand.cards().all(|card| cards.contains(card))
     }
-
 }
 
 #[cfg(test)]
