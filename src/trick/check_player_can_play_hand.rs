@@ -36,11 +36,6 @@ pub fn check_player_can_play_hand(
     attempt: &Hand,
 ) -> Result<(), PlayHandError> {
 
-    // attempt is always allowed to be pass
-    if matches!(attempt, Hand::Pass) {
-        return Ok(());
-    }
-
     // player may only play cards they possess
     if !player.has_cards(attempt) {
         return Err(PlayHandError::StolenCards);

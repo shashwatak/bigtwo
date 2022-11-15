@@ -15,6 +15,8 @@ use crate::card::Card;
 /// TODO: Fivers: Straight, Flush, FullHouse, FourPlusKicker, StraightFlush
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Hand {
+    /// No Hand, No Cards
+    Pass,
     /// aka Singles, Highs, Loners, Solos
     Lone(Card),
     /// aka Dubs, Dual, Two-of-a-Kind
@@ -29,8 +31,6 @@ pub enum Hand {
     FullHouse(Card, Card, Card, Card, Card),
     /// All Four of one Rank, plus any other card
     FourPlusKick(Card, Card, Card, Card, Card),
-    /// No Hand, No Cards
-    Pass,
 }
 
 impl fmt::Display for Hand {

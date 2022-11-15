@@ -31,6 +31,10 @@ pub fn order(current: &Hand, attempt: &Hand) -> Option<std::cmp::Ordering> {
             Some(current.cmp(attempt))
         }
     }
+    // everything beats Pass and Pass beats everything
+    else if matches!(current, Hand::Pass) || matches!(attempt, Hand::Pass) {
+        Some(std::cmp::Ordering::Less)
+    }
     // if both current and attempt are different variants,
     // cannot match Lone, Pair, or Trip with anything but themselves
     else if matches!(current, Hand::Lone(..) | Hand::Pair(..) | Hand::Trips(..))
