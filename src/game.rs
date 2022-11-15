@@ -1,10 +1,9 @@
 //! Run the entire Game Loop.
 
 use crate::card::THREE_OF_CLUBS;
-use crate::constants::NUM_PLAYERS;
 use crate::deck::Deck;
 use crate::player::Player;
-use crate::trick::{perform_trick, TrickResult};
+use crate::trick::{perform_trick, TrickResult, NUM_PLAYERS};
 
 /// Run the entire Game Loop.
 /// 1. Generate 4 Players (3 NPC and 1 PC)

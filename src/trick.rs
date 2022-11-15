@@ -16,9 +16,12 @@ use next_player_id::next_player_id;
 use std::collections::BTreeSet;
 
 use crate::card::THREE_OF_CLUBS;
-use crate::constants::NUM_PLAYERS;
 use crate::hand::Hand;
 use crate::player::Player;
+
+/// There are many variations of this game with non-4 numbers of players, but for now we focus on
+/// the base game.
+pub const NUM_PLAYERS: usize = 4;
 
 /// Returned at the end of a Trick to signify to the caller
 #[derive(Debug)]
@@ -127,7 +130,7 @@ impl Trick {
         println!("Player {starting_player_id} begins with {starting_hand}");
         player.remove_hand_from_cards(&starting_hand);
 
-        let next_player_id = next_player_id(starting_player_id, &BTreeSet::new());
+        let next_player_id = next_player_id(starting_player_id, &BTreeSet::new(), NUM_PLAYERS);
 
         Self {
             hand: vec![starting_hand],
@@ -189,7 +192,7 @@ impl Trick {
             player.remove_hand_from_cards(&submitted_hand);
             self.hand.push(submitted_hand);
         }
-        self.current_player_id = next_player_id(self.current_player_id, &self.passed_player_ids);
+        self.current_player_id = next_player_id(self.current_player_id, &self.passed_player_ids, NUM_PLAYERS);
     }
 
     /// Returns StepStatus::GameOver if a player has 0 cards (that player has won).
