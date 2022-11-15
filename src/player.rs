@@ -51,12 +51,12 @@ impl Player {
             get_user_input(&mut std::io::stdin().lock())
         };
         self.start_game = |cards| {
-            println!("=== Please start the game using the |3C| .");
+            println!("=== Please start the game using the |3C|.");
             println!("=== {}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
         self.start_trick = |cards| {
-            println!("=== You may play any valid hand.");
+            println!("=== Please start the trick by playing any valid hand.");
             println!("=== {}", cards_to_string(cards));
             get_user_input(&mut std::io::stdin().lock())
         };
