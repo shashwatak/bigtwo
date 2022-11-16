@@ -190,7 +190,7 @@ mod tests {
             assert!(matches!(order(&bigger, &smaller), Some(Ordering::Greater)));
         }
 
-        let incomparable_with_fivers = ["2S", "2S 2H", "2S 2H 2D",];
+        let incomparable_with_fivers = ["2S", "2S 2H", "2S 2H 2D"];
 
         for fiver in fivers {
             for incomparable in incomparable_with_fivers {

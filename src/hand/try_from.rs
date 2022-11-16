@@ -98,7 +98,6 @@ impl Hand {
         fourth: Card,
         fifth: Card,
     ) -> Result<Hand, InvalidHandError> {
-
         assert!(fifth < fourth);
         assert!(fourth < third);
         assert!(third < second);
