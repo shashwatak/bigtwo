@@ -60,7 +60,7 @@ pub fn perform_trick(
 #[derive(Debug)]
 struct Trick {
     /// The hand used to start the Trick, and all following played hands.
-    hand: Vec<Hand>,
+    played_hands: Vec<Hand>,
 
     /// Used to index into a [Player; NUM_PLAYERS] which is passed into functions
     /// TODO: (maybe) use lifetimes and a reference to [Player; NUM_PLAYERS].
@@ -133,7 +133,7 @@ impl Trick {
         let next_player_id = next_player_id(starting_player_id, &BTreeSet::new(), NUM_PLAYERS);
 
         Self {
-            hand: vec![starting_hand],
+            played_hands: vec![starting_hand],
             current_player_id: next_player_id,
             passed_player_ids: BTreeSet::new(),
         }
@@ -179,8 +179,19 @@ impl Trick {
         );
 
         let player = &mut players[self.current_player_id];
-        let submitted_hand = Trick::get_submitted_hand(player, self.hand.last().unwrap());
 
+        // this blocks
+        let hand_to_beat = self.played_hands.last().unwrap();
+        let submitted_hand = loop {
+            let attempt = (player.submit_hand)(&hand_to_beat, &player.cards);
+
+            let is_attempt_allowed = check_player_can_play_hand(hand_to_beat, player, &attempt);
+
+            match is_attempt_allowed {
+                Ok(()) => break attempt,
+                Err(e) => println!("{}: {}", attempt, e),
+            }
+        };
         if let Hand::Pass = submitted_hand {
             println!("Player {} passed", self.current_player_id);
             self.passed_player_ids.insert(self.current_player_id);
@@ -190,9 +201,10 @@ impl Trick {
                 self.current_player_id, submitted_hand
             );
             player.remove_hand_from_cards(&submitted_hand);
-            self.hand.push(submitted_hand);
+            self.played_hands.push(submitted_hand);
         }
-        self.current_player_id = next_player_id(self.current_player_id, &self.passed_player_ids, NUM_PLAYERS);
+        self.current_player_id =
+            next_player_id(self.current_player_id, &self.passed_player_ids, NUM_PLAYERS);
     }
 
     /// Returns StepStatus::GameOver if a player has 0 cards (that player has won).
@@ -213,21 +225,6 @@ impl Trick {
             unreachable!();
         } else {
             StepStatus::Continue
-        }
-    }
-
-    /// Keep asking the player to submit a Hand, until they submit a legal playable Hand.
-    /// (i.e. keep getting their inputs until they submit valid input that can progess the game).
-    fn get_submitted_hand(player: &Player, hand_to_beat: &Hand) -> Hand {
-        loop {
-            let attempt = (player.submit_hand)(hand_to_beat, &player.cards);
-
-            let is_attempt_allowed = check_player_can_play_hand(hand_to_beat, player, &attempt);
-
-            match is_attempt_allowed {
-                Ok(()) => break attempt,
-                Err(e) => println!("{}: {}", attempt, e),
-            }
         }
     }
 }
@@ -254,7 +251,7 @@ mod tests {
             StepStatus::Continue
         ));
 
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"3C".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -276,7 +273,7 @@ mod tests {
             StepStatus::Continue
         ));
 
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"4D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -322,7 +319,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -336,7 +333,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -351,7 +348,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"7D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -366,7 +363,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"AS".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -381,7 +378,7 @@ mod tests {
             StepStatus::TrickOver(winner) => assert_eq!(winner, 0),
             a => panic!("{:?}", a),
         }
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"AS".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -414,7 +411,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -428,7 +425,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"6D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -443,7 +440,7 @@ mod tests {
             trick.is_trick_over(&players),
             StepStatus::Continue
         ));
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"7D".parse().unwrap()),
             a => panic!("{}", a),
         }
@@ -457,7 +454,7 @@ mod tests {
         assert!(
             matches!(trick.is_trick_over(&players), StepStatus::GameOver(p) if p == starting_player_id)
         );
-        match trick.hand.last().unwrap() {
+        match trick.played_hands.last().unwrap() {
             Hand::Lone(a) => assert_eq!(a, &"AS".parse().unwrap()),
             a => panic!("{}", a),
         }

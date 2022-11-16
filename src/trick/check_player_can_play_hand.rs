@@ -92,14 +92,9 @@ mod tests {
         let hand: Hand = "".parse().unwrap();
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
         assert!(matches!(res, Ok(_)));
-    }
-
-    #[test]
-    fn test_five_card_hands() {
-        let mut player = Player::default();
-        let hand_to_beat: Hand = "7D 6H 5C 4H 3D".parse().unwrap();
 
         // loses
+        let hand_to_beat: Hand = "7D 6H 5C 4H 3D".parse().unwrap();
         let cards = vec_card_from_str("7C 6D 5H 4D 3S");
         let hand = Hand::try_from_cards(&cards[..]).unwrap();
         player.cards = cards;
@@ -112,47 +107,5 @@ mod tests {
         player.cards = cards;
         let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
         assert!(matches!(res, Ok(_)));
-
-        // ensure that lones, pairs, and trips cannot play on fivers
-        let not_matching_hands = ["2S", "2S 2H", "2S 2H 2D"];
-        let cards = vec_card_from_str("2S 2H 2D");
-        player.cards = cards;
-        for hand in not_matching_hands {
-            let hand: Hand = hand.parse().unwrap();
-            let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-            assert!(matches!(res, Err(PlayHandError::NotMatching)));
-        }
-
-        // beat high straight with low flush
-        let hand_to_beat: Hand = "2D AH KC QH JD".parse().unwrap();
-        let cards = vec_card_from_str("TC 8C 6C 5C 4C");
-        let hand = Hand::try_from_cards(&cards[..]).unwrap();
-        player.cards = cards;
-        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Ok(_)));
-
-        // ensure that straights don't beat flushes
-        let hand_to_beat: Hand = "TC 8C 6C 5C 4C".parse().unwrap();
-        let cards = vec_card_from_str("2D AH KC QH JD");
-        let hand = Hand::try_from_cards(&cards[..]).unwrap();
-        player.cards = cards;
-        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::TooLow)));
-
-        // ensure that straights don't beat Full Houses
-        let hand_to_beat: Hand = "5S 5C 3S 3D 3C".parse().unwrap();
-        let cards = vec_card_from_str("2D AH KC QH JD");
-        let hand = Hand::try_from_cards(&cards[..]).unwrap();
-        player.cards = cards;
-        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::TooLow)));
-
-        // ensure that FourPlusKick beats FullHouse
-        let hand_to_beat: Hand = "2S 2H 5H 5D 5C".parse().unwrap();
-        let cards = vec_card_from_str("2D AH KC QH JD");
-        let hand = Hand::try_from_cards(&cards[..]).unwrap();
-        player.cards = cards;
-        let res = check_player_can_play_hand(&hand_to_beat, &player, &hand);
-        assert!(matches!(res, Err(PlayHandError::TooLow)));
     }
 }
