@@ -30,6 +30,8 @@ pub enum Hand {
     FullHouse(Card, Card, Card, Card, Card),
     /// All Four of one Rank, plus any other card
     FourPlusKick(Card, Card, Card, Card, Card),
+    /// 5 Cards of consecutive Rank AND of the same Suit
+    StraightFlush(Card, Card, Card, Card, Card),
 }
 
 impl fmt::Display for Hand {

@@ -20,6 +20,7 @@ impl Index<usize> for Hand {
             | Hand::Flush(a, b, c, d, e)
             | Hand::FullHouse(a, b, c, d, e)
             | Hand::FourPlusKick(a, b, c, d, e)
+            | Hand::StraightFlush(a, b, c, d, e)
                 if index < 5 =>
             {
                 [a, b, c, d, e][index]
@@ -51,7 +52,11 @@ impl<'a> Iterator for HandIterator<'a> {
             Hand::Lone(..) if idx == 0 => Some(&self.hand[idx]),
             Hand::Pair(..) if idx < 2 => Some(&self.hand[idx]),
             Hand::Trips(..) if idx < 3 => Some(&self.hand[idx]),
-            Hand::Straight(..) | Hand::Flush(..) | Hand::FullHouse(..) | Hand::FourPlusKick(..)
+            Hand::Straight(..)
+            | Hand::Flush(..)
+            | Hand::FullHouse(..)
+            | Hand::FourPlusKick(..)
+            | Hand::StraightFlush(..)
                 if idx < 5 =>
             {
                 Some(&self.hand[idx])

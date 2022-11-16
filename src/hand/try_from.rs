@@ -98,18 +98,23 @@ impl Hand {
         fourth: Card,
         fifth: Card,
     ) -> Result<Hand, InvalidHandError> {
+
         assert!(fifth < fourth);
         assert!(fourth < third);
         assert!(third < second);
         assert!(second < first);
 
-        if Hand::check_four_plus_kick(&first, &second, &third, &fourth, &fifth) {
+        let is_straight = Hand::check_straight(&first, &second, &third, &fourth, &fifth);
+        let is_flush = Hand::check_flush(&first, &second, &third, &fourth, &fifth);
+        if is_straight && is_flush {
+            Ok(Hand::StraightFlush(first, second, third, fourth, fifth))
+        } else if Hand::check_four_plus_kick(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::FourPlusKick(first, second, third, fourth, fifth))
         } else if Hand::check_full_house(&first, &second, &third, &fourth, &fifth) {
             Ok(Hand::FullHouse(first, second, third, fourth, fifth))
-        } else if Hand::check_flush(&first, &second, &third, &fourth, &fifth) {
+        } else if is_flush {
             Ok(Hand::Flush(first, second, third, fourth, fifth))
-        } else if Hand::check_straight(&first, &second, &third, &fourth, &fifth) {
+        } else if is_straight {
             Ok(Hand::Straight(first, second, third, fourth, fifth))
         } else {
             Err(InvalidHandError::NotAFiveCardHand)

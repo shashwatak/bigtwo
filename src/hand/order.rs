@@ -160,6 +160,48 @@ mod tests {
             order(&"4S 4D".parse().unwrap(), &"3D".parse().unwrap()),
             None
         ));
+    }
+
+    #[test]
+    fn test_fivers() {
+        // each successive hand can beat the previous hand in the list
+        let fivers = [
+            // Straights
+            "8H 7C 6D 5H 4C",
+            "2S AS KC QC JS",
+            // Flushes
+            "9D 8D 7D 5D 4D",
+            "2C KC QC JC 9C",
+            // FullHouses
+            "2S 2D 7S 7D 7C",
+            "8S 8D 8C 4H 4D",
+            // FourPlusKicks
+            "2S 7S 7H 7D 7C",
+            "8S 8H 8D 8C 4H",
+            // StraightFlushes
+            "7S 6S 5S 4S 3S",
+            "2D AD KD QD JD",
+        ];
+
+        for i in 1..fivers.len() {
+            let bigger: Hand = fivers[i].parse().unwrap();
+            let smaller: Hand = fivers[i - 1].parse().unwrap();
+            println!("{} > {}", bigger, smaller);
+            assert!(matches!(order(&bigger, &smaller), Some(Ordering::Greater)));
+        }
+
+        let incomparable_with_fivers = ["2S", "2S 2H", "2S 2H 2D",];
+
+        for fiver in fivers {
+            for incomparable in incomparable_with_fivers {
+                let fiver: Hand = fiver.parse().unwrap();
+                let incomparable: Hand = incomparable.parse().unwrap();
+                println!("{} ~ {}", fiver, incomparable);
+
+                assert!(matches!(order(&fiver, &incomparable), None));
+                assert!(matches!(order(&incomparable, &fiver), None));
+            }
+        }
 
         // Flush beats Straight
         assert!(matches!(
@@ -193,6 +235,15 @@ mod tests {
             order(
                 &"2S 2D 7S 7D 7C".parse().unwrap(),
                 &"8S 8D 8C 4H 4D".parse().unwrap()
+            ),
+            Some(Ordering::Less)
+        ));
+
+        // FourPlusKick uses Quads to compare
+        assert!(matches!(
+            order(
+                &"2S 7S 7H 7D 7C".parse().unwrap(),
+                &"8S 8H 8D 8C 4H".parse().unwrap()
             ),
             Some(Ordering::Less)
         ));
