@@ -1,7 +1,6 @@
 #![doc = include_str!("../README.md")]
 
 mod card;
-mod constants;
 mod deck;
 mod game;
 mod hand;
