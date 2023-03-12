@@ -4,7 +4,7 @@ use std::io::{self, Write};
 use crate::card::Card;
 use crate::hand::Hand;
 
-pub fn get_user_input<Input: BufRead>(f: &mut Input) -> Hand {
+pub fn get_cli_user_input<Input: BufRead>(f: &mut Input) -> Hand {
     loop {
         let mut line = String::new();
         print!("=== > ");
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn test_get_user_input() {
         let mut input = "3C".as_bytes();
-        let hand = get_user_input(&mut input);
+        let hand = get_cli_user_input(&mut input);
         assert!(matches!(hand, Hand::Lone(c) if c == THREE_OF_CLUBS));
 
         const THREE_OF_DIAMONDS: Card = Card {
@@ -66,13 +66,13 @@ mod tests {
         };
 
         let mut input = "3C 3S 3D".as_bytes();
-        let hand = get_user_input(&mut input);
+        let hand = get_cli_user_input(&mut input);
         assert!(
             matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,)
         );
 
         let mut input = "3G\n3S 4D\n3C 3S 3D".as_bytes();
-        let hand = get_user_input(&mut input);
+        let hand = get_cli_user_input(&mut input);
         assert!(
             matches!(hand, Hand::Trips(a, b, c) if a == THREE_OF_SPADES && b == THREE_OF_DIAMONDS && c == THREE_OF_CLUBS,)
         );
@@ -97,7 +97,7 @@ mod tests {
             THREE_OF_SPADES,
         ];
         let mut input = "3G\n3S 4D\n7C 6D 5H 4D 3S".as_bytes();
-        let hand = get_user_input(&mut input);
+        let hand = get_cli_user_input(&mut input);
         for (idx, card) in hand.cards().enumerate() {
             assert_eq!(*card, expected_cards[idx]);
         }
@@ -125,7 +125,7 @@ mod tests {
             },
         ];
         let mut input = "3G\n3S 4D\nTD 8D 6D 4D 3D".as_bytes();
-        let hand = get_user_input(&mut input);
+        let hand = get_cli_user_input(&mut input);
         for (idx, card) in hand.cards().enumerate() {
             assert_eq!(*card, expected_cards[idx]);
         }

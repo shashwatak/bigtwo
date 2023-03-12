@@ -1,7 +1,7 @@
 //! Represents a player in the game, could be AI or User.
 
 mod get_ai_input;
-mod get_user_input;
+mod get_cli_user_input;
 
 use std::collections::BTreeSet;
 use std::fmt::Display;
@@ -9,7 +9,7 @@ use std::fmt::Display;
 use get_ai_input::{
     PLAY_SMALLEST_SINGLE_OR_PASS, START_TRICK_WITH_SMALLEST_SINGLE, USE_THREE_OF_CLUBS,
 };
-use get_user_input::get_user_input;
+use get_cli_user_input::get_cli_user_input;
 
 use crate::{card::Card, hand::Hand};
 
@@ -48,17 +48,17 @@ impl Player {
         self.submit_hand = |_, cards| {
             println!("=== Your Turn.");
             println!("=== {}", cards_to_string(cards));
-            get_user_input(&mut std::io::stdin().lock())
+            get_cli_user_input(&mut std::io::stdin().lock())
         };
         self.start_game = |cards| {
             println!("=== Please start the game using the |3C|.");
             println!("=== {}", cards_to_string(cards));
-            get_user_input(&mut std::io::stdin().lock())
+            get_cli_user_input(&mut std::io::stdin().lock())
         };
         self.start_trick = |cards| {
             println!("=== Please start the trick by playing any valid hand.");
             println!("=== {}", cards_to_string(cards));
-            get_user_input(&mut std::io::stdin().lock())
+            get_cli_user_input(&mut std::io::stdin().lock())
         };
     }
 }
