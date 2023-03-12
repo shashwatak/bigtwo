@@ -183,7 +183,7 @@ impl Trick {
         // this blocks
         let hand_to_beat = self.played_hands.last().unwrap();
         let submitted_hand = loop {
-            let attempt = (player.submit_hand)(&hand_to_beat, &player.cards);
+            let attempt = (player.submit_hand)(hand_to_beat, &player.cards);
 
             let is_attempt_allowed = check_player_can_play_hand(hand_to_beat, player, &attempt);
 
