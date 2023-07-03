@@ -1,12 +1,13 @@
 //! Represents the "number" on a Standard-52 card, ordered.
 
 use core::fmt;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 /// Represents the "number" on a Standard-52 card, ordered.
 /// The convention in Big Two is:
 /// Three being the lowest, then Four, Five, ... through the Ace, and finally Two is the highest..
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Rank {
     Three,
     Four,

@@ -9,6 +9,8 @@ use suit::Suit;
 use core::fmt;
 use std::str::FromStr;
 
+use serde::{Deserialize, Serialize};
+
 use self::{rank::ParseRankError, suit::ParseSuitError};
 
 /// The Card that starts every game, we use this constant to conveniently identify it.
@@ -19,7 +21,7 @@ pub const THREE_OF_CLUBS: Card = Card {
 
 /// Represents a Standard-52 Playing Card.
 /// Composed of a Rank and a Suit, with Rank taking precedence over Suit.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Card {
     pub rank: Rank,
     pub suit: Suit,

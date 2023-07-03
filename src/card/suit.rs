@@ -2,9 +2,11 @@
 use core::fmt;
 use std::str::FromStr;
 
+use serde::{Deserialize, Serialize};
+
 /// Represents the suit on a Standard-52 card, ordered.
 /// In Big Two, the convention is to order the Suits alphabetically.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Suit {
     Clubs,
     Diamonds,
