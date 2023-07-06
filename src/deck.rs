@@ -13,7 +13,11 @@ pub struct Deck {
     // pub cards: [Card; NUM_CARDS_IN_DECK],
     pub cards: Vec<Card>,
 }
-
+impl Default for Deck {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Deck {
     pub fn new() -> Deck {
         let mut cards: Vec<Card> = Vec::new();

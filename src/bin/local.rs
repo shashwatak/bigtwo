@@ -1,13 +1,13 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str!("../../README.md")]
+// use crate::*;
+// mod card;
+// mod deck;
+// mod game;
+// mod hand;
+// mod player;
+// mod trick;
 
-mod card;
-mod deck;
-mod game;
-mod hand;
-mod player;
-mod trick;
-
-use game::perform_game;
+use bigtwo::game::perform_game;
 
 fn main() {
     println!("-------------------");
@@ -15,9 +15,4 @@ fn main() {
     println!("Submit hands by typing the cards in e.g. \"3C 3D 3S\"");
     println!("-------------------");
     perform_game();
-}
-
-#[cfg(test)]
-mod tests {
-    pub mod test_util;
 }
